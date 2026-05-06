@@ -1,0 +1,24 @@
+{
+  "name": "resume-barista",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "render": "node scripts/build.mjs render",
+    "pdf": "node scripts/build.mjs pdf",
+    "build": "npm run render && npm run pdf",
+    "render:even": "node scripts/build.mjs render jsonresume-theme-even",
+    "render:flat": "node scripts/build.mjs render jsonresume-theme-flat",
+    "pdf:even": "node scripts/build.mjs pdf jsonresume-theme-even",
+    "pdf:flat": "node scripts/build.mjs pdf jsonresume-theme-flat",
+    "validate": "node scripts/validate.mjs",
+    "watch": "chokidar \"src/*.json\" -c \"npm run render\"",
+    "open": "start dist\\barista-resume.html"
+  },
+  "devDependencies": {
+    "chokidar-cli": "^3.0.0",
+    "jsonresume-theme-straightforward": "^0.5.0",
+    "puppeteer": "^24.43.0",
+    "resumed": "^6.1.0"
+  }
+}
