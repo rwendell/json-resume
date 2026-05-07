@@ -75,20 +75,43 @@
 	"projects": [
 		{
 			"name": "Gowall",
-			"description": "A wallpaper-centric Go utility featuring wallpaper color conversion, GAN-based upscaling, and hybrid VLM OCR. 1.4k GitHub stars.",
-			"keywords": ["Go", "GAN", "VLM", "OCR"],
+			"description": "A wallpaper-centric Go utility featuring wallpaper color conversion, GAN-based upscaling, and hybrid VLM OCR",
+			"highlights": [
+				"1.4k GitHub stars",
+				"Built with Go, featuring GAN-based upscaling and hybrid VLM OCR"
+			],
+			"keywords": [
+				"Go",
+				"GAN",
+				"VLM",
+				"OCR"
+			],
 			"url": "https://github.com/Achno/gowall"
 		},
 		{
 			"name": "slippi-postgame-cli",
-			"description": "CLI application that reads serial data and performs statistical analytics for Slippi replays.",
-			"keywords": ["Node.js", "TypeScript", "YARGS"],
+			"description": "CLI application that reads serial data and performs statistical analytics for Slippi replays",
+			"highlights": [
+				"Node.js, TypeScript, YARGS based CLI application that reads serial data and performs statistical analytics"
+			],
+			"keywords": [
+				"Node.js",
+				"TypeScript",
+				"YARGS"
+			],
 			"url": "https://github.com/rwendell/slippi-postgame-cli"
 		},
 		{
 			"name": "gc-adapter",
-			"description": "WebUSB implementation for reading inputs from a GameCube adapter.",
-			"keywords": ["Node.js", "TypeScript", "WebUSB"],
+			"description": "WebUSB implementation for reading inputs from a GameCube adapter",
+			"highlights": [
+				"Node.js, TypeScript, WebUSB implementation for reading inputs from a GameCube adapter"
+			],
+			"keywords": [
+				"Node.js",
+				"TypeScript",
+				"WebUSB"
+			],
 			"url": "https://github.com/rwendell/gc-adapter"
 		}
 	],
@@ -99,24 +122,6 @@
 			"studyType": "BS",
 			"startDate": "2016-08",
 			"endDate": "2020-12"
-		}
-	],
-	"skills": [
-		{
-			"name": "Languages",
-			"keywords": ["Java", "TypeScript", "SQL", "C#", "Go"]
-		},
-		{
-			"name": "Frameworks & Libraries",
-			"keywords": ["Spring Boot", "React", "Redux", "JPA/Hibernate", "JUnit", "Jest", "Cypress"]
-		},
-		{
-			"name": "Infrastructure & Tools",
-			"keywords": ["Apache Kafka", "Snowflake", "Azure", "Oracle", "Git", "CI/CD"]
-		},
-		{
-			"name": "Practices",
-			"keywords": ["Agile", "Test Driven Development", "Accessibility (a11y)", "Code Review", "Technical Documentation"]
 		}
 	],
 	"meta": {
