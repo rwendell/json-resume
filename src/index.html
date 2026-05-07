@@ -70,14 +70,14 @@
 
         function load(id) {
             const resume = resumes.find(r => r.id === id) || resumes.find(r => r.id === defaultResume);
-            frame.src = resume.id + '.html';
+            frame.src = 'pages/' + resume.id + '.html';
             location.hash = resume.id;
             
             document.querySelectorAll('nav button').forEach(b =>
                 b.classList.toggle('active', b.dataset.resume === resume.id));
             
             if (resume.pdf) {
-                downloadBtn.href = resume.id + '.pdf';
+                downloadBtn.href = 'pdf/' + resume.id + '.pdf';
                 downloadBtn.download = resume.id + '.pdf';
                 downloadBtn.classList.remove('hidden');
             } else {
