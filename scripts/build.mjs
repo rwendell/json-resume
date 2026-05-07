@@ -1,35 +1,34 @@
 import { execSync } from 'child_process';
-import { readdirSync, mkdirSync } from 'fs';
+import { mkdirSync } from 'fs';
 import { resolve, dirname, basename } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const srcDir = resolve(__dirname, '..', 'src');
-const distDir = resolve(__dirname, '..', 'dist');
 const rootDir = resolve(__dirname, '..');
 
-const command = process.argv[2]; // 'render' or 'pdf'
+const command = process.argv[2];
+const file = process.argv[3];
+const theme = process.argv[4];
 
-if (!command || (command !== 'render' && command !== 'pdf')) {
-  console.error('Usage: node scripts/build.mjs <render|pdf> [theme]');
+if (!command || !file) {
+  console.error('Usage: node scripts/build.mjs <render|pdf> <src/resume.json> [theme]');
+  console.error('  e.g.: node scripts/build.mjs pdf src/barista-resume.json');
+  console.error('  e.g.: node scripts/build.mjs render src/barista-resume.json jsonresume-theme-even');
   process.exit(1);
 }
 
-const themeArg = process.argv[3] ? `-t ${process.argv[3]}` : '';
-mkdirSync(distDir, { recursive: true });
+const base = basename(file, '.json');
+const src = resolve(rootDir, file);
+const outDir = resolve(rootDir, 'dist', base);
+const ext = command === 'pdf' ? 'pdf' : 'html';
+const out = resolve(outDir, `${base}.${ext}`);
+const themeFlag = theme ? `-t ${theme}` : '';
 
-const files = readdirSync(srcDir).filter(f => f.endsWith('.json'));
+mkdirSync(outDir, { recursive: true });
 
-for (const file of files) {
-  const base = basename(file, '.json');
-  const src = resolve(srcDir, file);
-  const ext = command === 'pdf' ? 'pdf' : 'html';
-  const out = resolve(distDir, `${base}.${ext}`);
+const cmd = command === 'pdf'
+  ? `npx resumed export "${src}" -o "${out}" ${themeFlag}`
+  : `npx resumed render "${src}" -o "${out}" ${themeFlag}`;
 
-  const cmd = command === 'pdf'
-    ? `npx resumed export "${src}" -o "${out}" ${themeArg}`
-    : `npx resumed render "${src}" -o "${out}" ${themeArg}`;
-
-  console.log(`${command}: ${file} -> ${base}.${ext}`);
-  execSync(cmd, { cwd: rootDir, stdio: 'inherit' });
-}
+console.log(`${command}: ${file} -> dist/${base}/${base}.${ext}`);
+execSync(cmd, { cwd: rootDir, stdio: 'inherit' });
