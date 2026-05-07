@@ -1,0 +1,100 @@
+{
+	"$schema": "https://raw.githubusercontent.com/jsonresume/resume-schema/master/schema.json",
+	"basics": {
+		"name": "Ryan Wendell",
+		"label": "Product Manager",
+		"email": "ryanjwendell@gmail.com",
+		"phone": "(224) 723-4213",
+		"url": "https://rwendell.github.io",
+		"summary": "Product Manager with 4+ years of experience delivering enterprise-scale features and managing cross-functional teams. Proven track record of translating business needs into technical roadmaps, facilitating Agile ceremonies, and driving product stability through data-driven decision making.",
+		"location": {
+			"city": "Chicago",
+			"region": "Illinois",
+			"countryCode": "US"
+		},
+		"profiles": [
+			{
+				"network": "LinkedIn",
+				"username": "rjwendell",
+				"url": "https://www.linkedin.com/in/rjwendell/"
+			},
+			{
+				"network": "GitHub",
+				"username": "rwendell",
+				"url": "https://github.com/rwendell"
+			}
+		]
+	},
+	"work": [
+		{
+			"name": "Northern Trust",
+			"position": "Senior Associate - Software Engineering",
+			"url": "https://www.linkedin.com/company/3831/",
+			"startDate": "2022-08",
+			"endDate": "2026-02",
+			"summary": "Product-focused engineering role driving end-to-end feature delivery and serving as liaison between technical squads and non-technical stakeholders.",
+			"highlights": [
+				"Spearheaded the end-to-end delivery of large-scale features for global partners, serving as the primary liaison between technical squads and non-technical stakeholders to align progress with strategic timelines.",
+				"Facilitated all Agile ceremonies (Sprint Planning, Stand-ups, Retrospectives) during PM absences, ensuring consistent velocity and backlog health for high-priority initiatives.",
+				"Conducted interviews with internal and external users to define business logic and API specifications, translating high-level business needs into detailed technical roadmaps.",
+				"Managed the development of data pipelines processing 2.5M daily transactions, ensuring product stability and high-performance throughput for enterprise users.",
+				"Directed the development of automated visualization tools and diagnostic utilities, reducing system regressions and improving the overall stability and UX for global partners.",
+				"Established and documented troubleshooting frameworks and maintenance processes to ensure seamless internal knowledge transfer and long-term product support."
+			]
+		},
+		{
+			"name": "BluBracket (acquired by HashiCorp)",
+			"position": "Software Engineer Consultant",
+			"url": "https://www.linkedin.com/company/36107929/",
+			"startDate": "2021-12",
+			"endDate": "2022-06",
+			"summary": "Product-focused consulting role defining requirements for security dashboards and overseeing implementation of testing suites and accessibility compliance.",
+			"highlights": [
+				"Collaborated with cross-functional departments to define requirements for a centralized security dashboard, prioritizing features based on vulnerability detection accuracy and enterprise risk-scoring needs.",
+				"Oversaw the implementation of comprehensive testing suites and accessibility (a11y) compliance, ensuring a reliable and inclusive experience for diverse user groups.",
+				"Partnered with security analysts and developers to resolve critical logic flaws in scoring algorithms, directly improving data integrity for enterprise clients."
+			]
+		},
+		{
+			"name": "Impact Networking, LLC",
+			"position": "BPA Developer",
+			"url": "https://www.linkedin.com/company/44730/",
+			"startDate": "2021-03",
+			"endDate": "2021-12",
+			"summary": "Delivered automation solutions for diverse client portfolio, identifying workflow bottlenecks and translating requirements into tailored technical solutions.",
+			"highlights": [
+				"Orchestrated full-stack automation solutions for a diverse portfolio of clients, including a non-profit medical organization, ensuring compliance with specialized workflow requirements.",
+				"Streamlined enterprise workflows across HR, fundraising, and OCR departments by identifying manual bottlenecks and delivering tailored .NET and SQL automation solutions."
+			]
+		}
+	],
+	"skills": [
+		{
+			"name": "Project Management",
+			"keywords": ["Agile/Scrum Methodology", "Stakeholder Management", "Requirement Gathering", "Roadmap Planning", "Backlog Grooming", "Jira/Confluence", "Resource Allocation", "Technical Roadmaps"]
+		},
+		{
+			"name": "Solution Architecture",
+			"keywords": ["Data Pipelines", "API Design", "System Architecture", "Risk Assessment & Mitigation"]
+		},
+		{
+			"name": "Development",
+			"keywords": ["Java", "Spring Boot", "SQL", "Apache Kafka", "TypeScript", "JavaScript", "React", "Redux", ".NET"]
+		}
+	],
+	"education": [
+		{
+			"institution": "Iowa State University",
+			"area": "Computer Science",
+			"studyType": "BS",
+			"startDate": "2016-08",
+			"endDate": "2020-12"
+		}
+	],
+	"meta": {
+		"canonical": "https://gist.github.com/e597887d6598c25d2b880c079c6937fe",
+		"theme": "jsonresume-theme-straightforward",
+		"version": "v1.0.0",
+		"lastModified": "2026-05-06T00:00:00"
+	}
+}
