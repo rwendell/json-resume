@@ -1,0 +1,20 @@
+{
+	"name": "resume-json",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"render": "node scripts/build.mjs render",
+		"pdf": "node scripts/build.mjs pdf",
+		"build": "node scripts/build.mjs build-all",
+		"render-all": "node scripts/build.mjs render-all",
+		"pdf-all": "node scripts/build.mjs pdf-all",
+		"validate": "node scripts/validate.mjs",
+		"watch": "node scripts/watch.mjs"
+	},
+	"devDependencies": {
+		"jsonresume-theme-straightforward": "^0.5.0",
+		"puppeteer": "^24.43.0",
+		"resumed": "^6.1.0"
+	}
+}
