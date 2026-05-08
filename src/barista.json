@@ -3,9 +3,8 @@
 	"basics": {
 		"name": "Ryan Wendell",
 		"label": "Barista",
-		"email": "ryainjwendell@gmail.com",
+		"email": "ryanjwendell@gmail.com",
 		"phone": "(224) 723-4213",
-		"summary": "",
 		"location": {
 			"city": "Chicago",
 			"region": "Illinois",
@@ -54,7 +53,7 @@
 			"organization": "Junbi Matcha & Tea",
 			"position": "Espresso & Milk Steaming Trainer",
 			"highlights": [
-				"Trained owners and staff how to properly dial-in espresso machine and steam milk for espresso and matcha based drinks",
+				"Trained owners and staff how to properly dial-in espresso machine and steam milk for espresso and matcha based drinks.",
 				"Provided support on technique and technical knowledge."
 			]
 		},
@@ -62,8 +61,8 @@
 			"organization": "Private Coffee Shop Pop-Up",
 			"position": "Head Barista",
 			"highlights": [
-				"Created seasonal beverages for a private coffee pop-up catering owner",
-				"Managed rush of over 30 guests arriving simultaneously"
+				"Crafted 3–5 specialized seasonal beverages per event alongside a full espresso menu",
+				"Managed a rush of 30+ simultaneous guests as sole barista"
 			]
 		}
 	],
