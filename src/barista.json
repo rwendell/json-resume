@@ -10,19 +10,7 @@
 			"city": "Chicago",
 			"region": "Illinois",
 			"countryCode": "US"
-		},
-		"profiles": [
-			{
-				"network": "LinkedIn",
-				"username": "rjwendell",
-				"url": "https://www.linkedin.com/in/rjwendell/"
-			},
-			{
-				"network": "GitHub",
-				"username": "rwendell",
-				"url": "https://github.com/rwendell"
-			}
-		]
+		}
 	},
 	"work": [
 		{
@@ -73,30 +61,18 @@
 				"Produced documentation including specifications, process flowcharts, and maintenance guides to support knowledge transfer.",
 				"Mentored junior team members through reviews, technical guidance, and documented troubleshooting strategies."
 			]
+		}
+	],
+	"volunteer": [
+		{
+			"organization": "Junbi Matcha & Tea",
+			"position": "Espresso & Milk Steaming Trainer",
+			"highlights": "Trained owners and staff how to properly dial-in espresso machine and steam milk for espresso and matcha based drinks.  Provided support on technique and technical knowledge."
 		},
 		{
-			"name": "BluBracket (acquired by HashiCorp)",
-			"position": "Software Engineer Consultant",
-			"url": "https://www.linkedin.com/company/36107929/",
-			"location": "Palo Alto, California",
-			"startDate": "2021-12",
-			"endDate": "2022-06",
-			"highlights": [
-				"Resolved critical issues in risk-scoring logic, ensuring accuracy and reducing false-positive alerts for clients.",
-				"Ensured accessibility compliance across the application, implementing keyboard navigation and screen-reader support."
-			]
-		},
-		{
-			"name": "Impact Networking, LLC",
-			"position": "BPA Developer",
-			"url": "https://www.linkedin.com/company/44730/",
-			"location": "Chicago, Illinois",
-			"startDate": "2021-03",
-			"endDate": "2021-12",
-			"highlights": [
-				"Orchestrated full-stack automation solutions to streamline enterprise workflows across HR and fundraising departments.",
-				"Identified workflow bottlenecks and improved team efficiency through clear communication and problem-solving."
-			]
+			"organization": "Private Coffee Shop Pop-Up",
+			"position": "Head Barista",
+			"highlights": "Created seasonal beverages for a private coffee pop-up catering owner"
 		}
 	],
 	"education": [

@@ -1,0 +1,115 @@
+name: Publish Resume
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      gist-id: ${{ steps.gist.outputs.gist-id }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build all resumes (HTML + PDF)
+        run: npm run build
+
+      - name: Update Gist with JSON Resumes
+        id: gist
+        env:
+          GH_TOKEN: ${{ secrets.GIST_TOKEN }}
+        run: |
+          # Create or update gist with all JSON files
+          FILES_JSON=$(jq -n \
+            --arg barista "$(jq -c . src/barista.json)" \
+            --arg pm "$(jq -c . src/product-manager.json)" \
+            --arg se "$(jq -c . src/software-engineer.json)" \
+            '{
+              "barista.json": {"content": $barista},
+              "product-manager.json": {"content": $pm},
+              "software-engineer.json": {"content": $se}
+            }')
+
+          if [ -n "${{ secrets.GIST_ID }}" ]; then
+            # Update existing gist
+            curl -X PATCH \
+              -H "Authorization: token $GH_TOKEN" \
+              -H "Accept: application/vnd.github.v3+json" \
+              "https://api.github.com/gists/${{ secrets.GIST_ID }}" \
+              -d "{\"files\": $FILES_JSON}"
+            echo "gist-id=${{ secrets.GIST_ID }}" >> $GITHUB_OUTPUT
+          else
+            # Create new gist
+            RESPONSE=$(curl -X POST \
+              -H "Authorization: token $GH_TOKEN" \
+              -H "Accept: application/vnd.github.v3+json" \
+              "https://api.github.com/gists" \
+              -d "{\"public\": true, \"description\": \"Ryan Wendell - JSON Resumes\", \"files\": $FILES_JSON}")
+            NEW_GIST_ID=$(echo "$RESPONSE" | jq -r .id)
+            echo "gist-id=$NEW_GIST_ID" >> $GITHUB_OUTPUT
+            echo "::notice::Created new gist: https://gist.github.com/$NEW_GIST_ID"
+          fi
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  deploy-to-github-pages:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  deploy-to-github-io-repo:
+    needs: build
+    runs-on: ubuntu-latest
+    if: ${{ secrets.GH_IO_REPO != '' }}
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Deploy to github.io repo
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          deploy_key: ${{ secrets.GH_IO_DEPLOY_KEY }}
+          external_repository: ${{ secrets.GH_IO_REPO }}
+          publish_branch: main
+          publish_dir: ./dist
+          commit_message: "Update resume from source repo"

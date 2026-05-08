@@ -5,15 +5,15 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = resolve(__dirname, '..');
 
-const file = process.argv[2];
+const input = process.argv[2];
 
-if (!file) {
-  console.error('Usage: node scripts/watch.mjs <src/resume.json>');
-  console.error('  e.g.: node scripts/watch.mjs src/barista-resume.json');
+if (!input) {
+  console.error('Usage: node scripts/watch.mjs <resume>');
+  console.error('  e.g.: node scripts/watch.mjs barista');
   process.exit(1);
 }
 
-const resolvedFile = file.endsWith('.json') ? file : `${file}.json`;
+const resolvedFile = input.includes('/') ? (input.endsWith('.json') ? input : `${input}.json`) : `src/${input.endsWith('.json') ? input : `${input}.json`}`;
 const base = basename(resolvedFile, '.json');
 const src = resolve(rootDir, resolvedFile);
 const outDir = resolve(rootDir, 'dist', base);
