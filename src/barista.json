@@ -54,12 +54,18 @@
 		{
 			"organization": "Junbi Matcha & Tea",
 			"position": "Espresso & Milk Steaming Trainer",
-			"highlights": "Trained owners and staff how to properly dial-in espresso machine and steam milk for espresso and matcha based drinks.  Provided support on technique and technical knowledge."
+			"highlights": [
+				"Trained owners and staff how to properly dial-in espresso machine and steam milk for espresso and matcha based drinks",
+				"Provided support on technique and technical knowledge."
+			]
 		},
 		{
 			"organization": "Private Coffee Shop Pop-Up",
 			"position": "Head Barista",
-			"highlights": "Created seasonal beverages for a private coffee pop-up catering owner"
+			"highlights": [
+				"Created seasonal beverages for a private coffee pop-up catering owner",
+				"Managed rush of over 30 guests arriving simultaneously"
+			]
 		}
 	],
 	"education": [
