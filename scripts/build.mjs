@@ -35,7 +35,7 @@ function buildOne(cmd, file, theme) {
   mkdirSync(outDir, { recursive: true });
 
   const shell = cmd === 'pdf'
-    ? `npx resumed export "${src}" -o "${out}" ${themeFlag}`
+    ? `npx resumed export "${src}" -o "${out}" ${themeFlag} --puppeteer-arg=--no-sandbox`
     : `npx resumed render "${src}" -o "${out}" ${themeFlag}`;
 
   console.log(`${cmd}: ${file} -> dist/${base}/${base}.${ext}`);
