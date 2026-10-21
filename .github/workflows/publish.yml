@@ -4,8 +4,6 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-  schedule:
-    - cron: '*/15 * * * *'
 
 env:
   GIST_ID: e597887d6598c25d2b880c079c6937fe
@@ -13,8 +11,6 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    outputs:
-      resume-files: ${{ steps.fetch-gist-files.outputs.resume-files }}
     steps:
       - uses: actions/checkout@v4
 
@@ -25,41 +21,45 @@ jobs:
 
       - run: npm ci
 
-      - name: Fetch resume files from gist
-        id: fetch-gist-files
-        run: |
-          # The public gist is the source of truth. No token is needed to read it.
-          curl --fail --silent --show-error \
-            "https://api.github.com/gists/$GIST_ID" > /tmp/resume-gist.json
+      - name: Validate resume data
+        run: npm run validate all
 
-          FILE_NAMES=$(jq -r '.files | keys[] | select(. != "JSON-RESUME" and endswith(".json"))' /tmp/resume-gist.json)
-          if [ -z "$FILE_NAMES" ]; then
-            echo "::error::No resume JSON files found in gist $GIST_ID."
-            exit 1
+      - name: Build all resumes
+        run: npm run build
+
+      - name: Mirror resume JSON files to gist
+        env:
+          GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
+        run: |
+          if [ -z "$GIST_TOKEN" ]; then
+            echo "::warning::GIST_TOKEN is not configured; skipping gist mirror."
+            exit 0
           fi
 
-          echo "Found resume files in gist:"
-          echo "$FILE_NAMES"
-          {
-            echo 'resume-files<<EOF'
-            printf '%s\n' "$FILE_NAMES" | jq -R -s 'split("\n") | map(select(length > 0))'
-            echo 'EOF'
-          } >> "$GITHUB_OUTPUT"
+          CURRENT_FILES=$(find src -maxdepth 1 -type f -name '*.json' -printf '%f\n' | jq -R -s 'split("\n") | map(select(length > 0))')
+          EXISTING_FILES=$(curl --fail --silent --show-error \
+            "https://api.github.com/gists/$GIST_ID" | \
+            jq -c '[.files | keys[] | select(endswith(".json"))]')
 
-      - name: Prepare resume data from gist
-        run: |
-          # Delete checked-in JSON files so removed gist files cannot be built.
-          find src -maxdepth 1 -type f -name '*.json' -delete
+          UPDATES=$(find src -maxdepth 1 -type f -name '*.json' -print0 |
+            while IFS= read -r -d '' file; do
+              name=$(basename "$file")
+              content=$(cat "$file")
+              jq -n --arg name "$name" --arg content "$content" '{key: $name, value: {content: $content}}'
+            done | jq -s 'from_entries')
 
-          jq -r '.files | keys[] | select(. != "JSON-RESUME" and endswith(".json"))' /tmp/resume-gist.json |
-          while IFS= read -r filename; do
-            jq -r --arg filename "$filename" '.files[$filename].content' /tmp/resume-gist.json > "src/$filename"
-            jq empty "src/$filename"
-            echo "Prepared src/$filename"
-          done
+          DELETIONS=$(jq -n --argjson existing "$EXISTING_FILES" --argjson current "$CURRENT_FILES" \
+            '$existing - $current | map({key: ., value: null}) | from_entries')
+          FILES=$(jq -n --argjson updates "$UPDATES" --argjson deletions "$DELETIONS" \
+            '$updates * $deletions')
+          PAYLOAD=$(jq -n --argjson files "$FILES" '{files: $files}')
 
-      - name: Build all resumes from gist
-        run: npm run build
+          curl --fail --silent --show-error -X PATCH \
+            -H "Authorization: Bearer $GIST_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/gists/$GIST_ID" \
+            -d "$PAYLOAD"
+          echo "Gist mirror updated: $GIST_ID"
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -79,14 +79,12 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           name: dist
           path: dist
 
       - uses: actions/configure-pages@v4
-
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
@@ -112,4 +110,4 @@ jobs:
           external_repository: ${{ vars.GH_IO_REPO }}
           publish_branch: main
           publish_dir: ./dist
-          commit_message: "Update resume from source gist"
+          commit_message: "Update resume from source repository"

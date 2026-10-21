@@ -1,217 +1,96 @@
 # JSON Resume Builder
 
-A system for generating professional resumes from JSON data, using a modular architecture with GitHub Gists for data storage and GitHub Pages for hosting.
+This repository is the source of truth for Ryan Wendell's resumes. It generates HTML and PDF files, publishes them to `rwendell.github.io`, and mirrors the JSON files to a public GitHub Gist for sharing.
 
-## Architecture Overview
+## Architecture
 
-This project uses a new dynamic architecture:
+```text
+src/*.json (this repository)
+        ↓
+GitHub Actions
+        ├── dist/index.html, pages/, pdf/
+        ├── rwendell.github.io
+        └── public JSON Resume gist
+```
 
-1. **GitHub Gist** (`gists/json-resume/`) - **SOURCE OF TRUTH**: Stores all resume JSON data
-2. **This Repository** (`json-resume/`) - Generates HTML/PDF resumes from gist data
-3. **GitHub Pages** (`rwendell.github.io/`) - Hosts the generated resumes
+The gist (`e597887d6598c25d2b880c079c6937fe`) is a generated mirror, not an editing location. `JSON-RESUME` is preserved in the gist, while JSON resume files are synchronized dynamically from `src/`.
 
-## How It Works
+## Resume data
 
-The workflow now reads directly from the gist as the single source of truth:
+Resume files live in `src/`. Adding or removing a `.json` file there automatically adds or removes it from the generated site and gist on the next publish.
 
-1. **Fetch resume files**: Queries the gist API to discover available resumes
-2. **Exclude non-resume files**: Filters out `JSON-RESUME` and other irrelevant files
-3. **Download and prepare**: Downloads resume content from the gist to `src/`
-4. **Generate resumes**: Builds HTML/PDF files from the gist-sourced data
-5. **Update metadata**: Updates gist description only (preserves file history)
+The generated `dist/index.html` discovers resume labels from each file's `basics.label` field. No resume names are hardcoded in the website JavaScript.
 
-## Available Resumes
+## Setup
 
-The available resumes are determined by what JSON files exist in the gist:
-- **Software Engineer** - Ryan Wendell's primary tech role resume
-- **Product Manager** - Ryan's product management experience  
-- **Barista** - Ryan's earlier coffee shop experience
-
-Each resume includes work history, education, skills, projects, and volunteer experience.
-
-## Dynamic Behavior
-
-✅ **Source of truth**: The gist controls which resumes exist
-✅ **Auto-sync**: Adding/removing files in the gist automatically updates generated resumes
-✅ **Clean separation**: Non-resume files (like `JSON-RESUME`) are excluded
-✅ **No data loss**: Existing file history is preserved
-
-## Management Workflow
-
-**To add a new resume:**
-1. Add the JSON file directly to the gist
-2. Push to this repository (triggers workflow)
-3. Resume is automatically generated and deployed
-
-**To remove a resume:**
-1. Delete the JSON file from the gist
-2. Push to this repository (triggers workflow)
-3. Resume generation stops automatically
-
-**For documentation:** Store non-resume files like `JSON-RESUME` in the gist - they're excluded from processing.
-
-## Usage
-
-### Prerequisites
-
-- Node.js (v20+ recommended)
-- GitHub access with a Gist token
-
-### Installation
+Install dependencies with **aube**:
 
 ```bash
-npm ci
+aube ci
 ```
 
-### Commands
-
-| Command | Description |
-|---------|-------------|
-| `npm run render <name>` | Generate HTML resume for a specific version (e.g., `npm run render barista`) |
-| `npm run pdf <name>` | Generate PDF resume for a specific version (e.g., `npm run pdf software-engineer`) |
-| `npm run render-all` | Generate HTML resumes for all versions |
-| `npm run pdf-all` | Generate PDF resumes for all versions |
-| `npm run build` | Generate both HTML and PDF for all versions |
-| `npm run validate <name>` | Validate a resume JSON file (e.g., `npm run validate barista`) |
-| `npm run validate all` | Validate all resume JSON files |
-| `npm run watch <name>` | Watch a resume JSON file and rebuild HTML on changes |
-
-### Examples
+Use the package scripts through aube:
 
 ```bash
-# Generate a barista resume as HTML
-npm run render barista
-
-# Generate a software engineer resume as PDF
-npm run pdf software-engineer
-
-# Generate all resumes as both HTML and PDF
-npm run build
-
-# Validate all resumes
-npm run validate all
+aube run validate -- all
+aube run build
+aube run render -- software-engineer
+aube run pdf -- software-engineer
+aube run watch -- software-engineer
 ```
 
-## Development
+Generated files are placed in `dist/<resume>/` and `dist/index.html`.
 
-### Watch Mode
+## Available commands
 
-Use `npm run watch <name>` to automatically rebuild the HTML resume when the JSON source changes:
+| Command | Purpose |
+| --- | --- |
+| `aube run build` | Build HTML, PDFs, and the dynamic site index |
+| `aube run render -- <name>` | Render one resume as HTML |
+| `aube run pdf -- <name>` | Export one resume as PDF |
+| `aube run render-all` | Render all resumes as HTML |
+| `aube run pdf-all` | Export all resumes as PDF |
+| `aube run validate -- <name>` | Validate one resume |
+| `aube run validate -- all` | Validate all resumes |
+| `aube run watch -- <name>` | Development watch mode |
+
+Themes can be passed to render commands:
 
 ```bash
-npm run watch barista
+aube run render -- barista jsonresume-theme-even
 ```
 
-This is useful for testing different themes or making quick updates.
+## Publishing
 
-### Custom Themes
-
-You can use different themes with the render command:
+Push changes to `main`:
 
 ```bash
-npm run render barista jsonresume-theme-even
+git add src/
+git commit -m "Update resume"
+git push
 ```
 
-See the [JSON Resume Themes](https://github.com/jsonresume/themes) for available themes.
+The workflow validates every JSON file, builds all output and the dynamic index, updates the public gist mirror, and deploys `dist/` to the configured `rwendell.github.io` repository.
 
-## Configuration
+## GitHub configuration
 
-### package.json Scripts
+For gist mirroring, add the repository secret `GIST_TOKEN` with a GitHub token that has `gist` permission.
 
-The project includes scripts for:
-- `render`: Generate HTML resumes
-- `pdf`: Generate PDF resumes
-- `build-all`: Generate both formats for all resumes
-- `render-all`: Generate HTML for all resumes
-- `pdf-all`: Generate PDF for all resumes
-- `validate`: Validate JSON schema
-- `watch`: Auto-rebuild on file changes
+For the external Pages repository, add:
 
-### GitHub Actions
+- Repository variable `GH_IO_REPO`, such as `rwendell/rwendell.github.io`
+- Repository secret `GH_IO_DEPLOY_KEY`
 
-The `.github/workflows/publish.yml` workflow:
-1. Builds all resumes on push to main
-2. Updates the Gist with the latest JSON data
-3. Deploys HTML/PDF files to GitHub Pages
-4. Optionally deploys to a custom github.io repository
+The built-in GitHub Pages deployment is disabled unless the `PAGES_ENABLED` repository variable is set to `true`.
 
-## Project Structure
+## Project structure
 
-```
-json-resume/
-├── src/
-│   ├── barista.json              # Barista resume data
-│   ├── product-manager.json     # Product manager resume data
-│   └── software-engineer.json   # Software engineer resume data
-├── scripts/
-│   ├── build.mjs                # Build and generate resumes
-│   ├── validate.mjs             # Validate resume JSON
-│   └── watch.mjs                # Watch and rebuild on changes
-├── .github/workflows/publish.yml # CI/CD workflow
-├── package.json                 # Project configuration
-├── package-lock.json
-└── .gitignore
+```text
+src/                          Resume JSON source files
+scripts/build.mjs             HTML, PDF, and index generation
+scripts/validate.mjs          JSON Resume validation
+scripts/watch.mjs             Development watch mode
+.github/workflows/publish.yml Build, gist mirror, and deployment
 ```
 
-## Data Management
-
-### Gist Integration
-
-The actual resume JSON data is stored in a GitHub Gist:
-- Location: `gists/json-resume/`
-- Files: `barista.json`, `product-manager.json`, `software-engineer.json`
-
-The canonical URL in each JSON file points to this Gist:
-```
-"canonical": "https://gist.github.com/e597887d6598c25d2b880c079c6937fe"
-```
-
-This provides:
-- Version control for resume data
-- Easy backup and sharing
-- Content integrity through GitHub's infrastructure
-
-### Generating vs. Editing
-
-**Use this repository for:**
-- Building HTML/PDF resumes
-- Running validation
-- Testing different themes
-- Working with the resume schema
-
-**Use the Gist for:**
-- Storing actual resume content
-- Long-term data management
-- Backup and version history
-
-## Contributing
-
-### Adding a New Resume Version
-
-1. Add a new JSON file to the `src/` directory
-2. Update the build workflow in `scripts/build.mjs` if needed
-3. The GitHub Actions workflow will automatically handle the rest
-
-### Updating an Existing Resume
-
-1. Edit the JSON file in `src/`
-2. Run validation to ensure it meets schema requirements:
-   ```bash
-   npm run validate <name>
-   ```
-3. Rebuild the resume:
-   ```bash
-   npm run render <name>
-   ```
-4. Or use watch mode for incremental testing:
-   ```bash
-   npm run watch <name>
-   ```
-
-## Support
-
-This project uses the [JSON Resume Schema](https://jsonresume.org/) and the `resumed` CLI tool for generating resumes.
-
-## License
-
-This project is part of Ryan Wendell's personal portfolio and development tools.
+Resume files follow the [JSON Resume schema](https://jsonresume.org/) and use the `jsonresume-theme-straightforward` theme by default.
