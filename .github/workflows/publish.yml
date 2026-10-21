@@ -126,7 +126,6 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    if: secrets.GH_IO_REPO != ''
     steps:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
