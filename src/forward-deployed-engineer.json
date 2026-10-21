@@ -73,7 +73,7 @@
 			"description": "Full-stack collaborative application for planning household meals and generating shared shopping lists",
 			"highlights": [
 				"Delivered an end-to-end application with SvelteKit, TypeScript, and Convex, including authentication, household onboarding, invitations, and shared planning",
-				"Harnessed large language models (LLMs) as an implementation and debugging partner, validating outputs through testing, review, and product feedback"
+				"Harnessed large language models (LLMs) as an implementation and debugging tool, validating outputs through testing, review, and product feedback"
 			],
 			"keywords": [
 				"Requirements translation",
