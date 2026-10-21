@@ -24,9 +24,9 @@ jobs:
       - name: Fetch resume files from gist (source of truth)
         id: fetch-gist-files
         run: |
-          # Get all files from gist
+          # Get all files from YOUR specific gist
           GIST_DATA=$(curl -H "Authorization: token ${{ secrets.GIST_TOKEN }}" \
-            "https://api.github.com/gists/${{ secrets.GIST_ID }}")
+            "https://api.github.com/gists/e597887d6598c25d2b880c079c6937fe")
           
           # Extract file names and filter out JSON-RESUME
           FILE_NAMES=$(echo "$GIST_DATA" | jq -r '.files | keys[]')
@@ -49,7 +49,7 @@ jobs:
             
             # Get file content from gist
             CONTENT=$(curl -H "Authorization: token ${{ secrets.GIST_TOKEN }}" \
-              "https://api.github.com/gists/${{ secrets.GIST_ID }}/${filename}" | \
+              "https://api.github.com/gists/e597887d6598c25d2b880c079c6937fe/${filename}" | \
               jq -r '.content')
             
             # Save to src/ directory for building
