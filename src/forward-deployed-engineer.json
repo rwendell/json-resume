@@ -2,7 +2,6 @@
 	"$schema": "https://raw.githubusercontent.com/jsonresume/resume-schema/master/schema.json",
 	"basics": {
 		"name": "Ryan Wendell",
-		"label": "Forward-Deployed / Client Integration Engineer",
 		"email": "ryanjwendell@gmail.com",
 		"phone": "(224) 723-4213",
 		"url": "https://rwendell.github.io",
@@ -39,9 +38,7 @@
 				"Translated business needs into technical requirements and iterative delivery plans while driving story creation, sprint refinement, and Agile execution for international integrations.",
 				"Developed full-stack features with TypeScript, React, and Redux on the frontend and Spring Boot with Java 21 on the backend, integrating with internal enterprise systems.",
 				"Optimized Oracle SQL schemas and stored procedures, JPA/Hibernate mappings, and high-throughput Apache Kafka pipelines processing 2.5M daily transactions.",
-				"Consolidated disparate historical storage into Snowflake on Azure, optimizing storage costs while maintaining high availability for cross-functional teams.",
-				"Built automated health-check tooling and validation scripts to detect and remediate deployment regressions, improving operational stability for supported solutions.",
-				"Produced system specifications, process flowcharts, maintenance guides, and troubleshooting strategies to support knowledge transfer and long-term customer and team support."
+				"Built automated health-check tooling and validation scripts to detect and remediate deployment regressions, improving operational stability for supported solutions."
 			]
 		},
 		{
@@ -54,8 +51,7 @@
 			"highlights": [
 				"Built a React/Redux security dashboard for automated vulnerability detection and remediation across source code, developer environments, and CI/CD pipelines.",
 				"Resolved critical logic flaws in security risk-scoring algorithms, improving data accuracy and reducing false-positive alerts for enterprise clients.",
-				"Implemented Jest and Cypress testing suites to improve feature reliability and UI performance across staging and production environments.",
-				"Implemented keyboard navigation and ARIA attributes to support accessibility compliance and screen-reader users."
+				"Implemented Jest and Cypress testing suites to improve feature reliability and UI performance across staging and production environments."
 			]
 		},
 		{
@@ -73,37 +69,12 @@
 	],
 	"skills": [
 		{
-			"name": "Client & Product Delivery",
-			"keywords": ["Requirements Gathering", "Stakeholder Management", "API Specifications", "Technical Roadmaps", "Agile/Scrum Methodology", "Technical Documentation"]
+			"name": "Client Delivery",
+			"keywords": ["Requirements Gathering", "Stakeholder Management", "API Specifications", "Agile/Scrum Methodology"]
 		},
 		{
 			"name": "Full-Stack Engineering",
-			"keywords": ["Java", "Spring Boot", "TypeScript", "JavaScript", "React", "Redux", "C#/.NET", "SQL", "JPA/Hibernate"]
-		},
-		{
-			"name": "Integrations & Data",
-			"keywords": ["REST APIs", "Apache Kafka", "Data Pipelines", "Oracle", "Snowflake", "Azure", "Automated Testing", "CI/CD"]
-		}
-	],
-	"projects": [
-		{
-			"name": "Gowall",
-			"description": "A wallpaper-centric Go utility featuring wallpaper color conversion, GAN-based upscaling, and hybrid VLM OCR",
-			"highlights": [
-				"1.4k GitHub stars",
-				"Built with Go, featuring GAN-based upscaling and hybrid VLM OCR"
-			],
-			"keywords": ["Go", "GAN", "VLM", "OCR"],
-			"url": "https://github.com/Achno/gowall"
-		},
-		{
-			"name": "slippi-postgame-cli",
-			"description": "CLI application that reads serial data and performs statistical analytics for Slippi replays",
-			"highlights": [
-				"Node.js, TypeScript, YARGS based CLI application that reads serial data and performs statistical analytics"
-			],
-			"keywords": ["Node.js", "TypeScript", "YARGS"],
-			"url": "https://github.com/rwendell/slippi-postgame-cli"
+			"keywords": ["Java", "Spring Boot", "TypeScript", "React", "Redux", "C#/.NET", "SQL"]
 		}
 	],
 	"education": [
