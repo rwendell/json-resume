@@ -4,12 +4,16 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    - cron: '*/15 * * * *'
+
+env:
+  GIST_ID: e597887d6598c25d2b880c079c6937fe
 
 jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
-      gist-id: ${{ steps.gist.outputs.gist-id }}
       resume-files: ${{ steps.fetch-gist-files.outputs.resume-files }}
     steps:
       - uses: actions/checkout@v4
@@ -21,93 +25,41 @@ jobs:
 
       - run: npm ci
 
-      - name: Fetch resume files from gist (source of truth)
+      - name: Fetch resume files from gist
         id: fetch-gist-files
         run: |
-          # Get all files from YOUR specific gist
-          echo "Fetching files from gist..."
-          GIST_DATA=$(curl -H "Authorization: token ${{ secrets.GIST_TOKEN }}" \
-            "https://api.github.com/gists/e597887d6598c25d2b880c079c6937fe")
-          
-          # Check if we got valid data
-          if [ "$GIST_DATA" = "" ] || [ "$GIST_DATA" = "null" ]; then
-            echo "::error::Failed to fetch gist data. Check GIST_TOKEN secret."
+          # The public gist is the source of truth. No token is needed to read it.
+          curl --fail --silent --show-error \
+            "https://api.github.com/gists/$GIST_ID" > /tmp/resume-gist.json
+
+          FILE_NAMES=$(jq -r '.files | keys[] | select(. != "JSON-RESUME" and endswith(".json"))' /tmp/resume-gist.json)
+          if [ -z "$FILE_NAMES" ]; then
+            echo "::error::No resume JSON files found in gist $GIST_ID."
             exit 1
           fi
-          
-          # Extract all .json files from gist
-          FILE_NAMES=$(echo "$GIST_DATA" | jq -r '.files | to_entries[] | select(.key | endswith(".json")) | .key')
-          
-          if [ "$FILE_NAMES" = "" ]; then
-            echo "::error::No .json files found in gist."
-            exit 1
-          fi
-          
-          echo "Found files in gist: $FILE_NAMES"
-          
-          # All .json files are potential resume files
-          RESUME_FILES=$(echo "$FILE_NAMES" | jq -R . | jq -s .)
-          
-          echo "Processing resume files: $RESUME_FILES"
-          echo "resume-files=$RESUME_FILES" >> $GITHUB_OUTPUT
 
-      - name: Download and prepare resume data
-        id: prepare-data
-        run: |
-          RESUME_FILES="${{ steps.fetch-gist-files.outputs.resume-files }}"
-          
-          if [ "$RESUME_FILES" = "" ] || [ "$RESUME_FILES" = "null" ]; then
-            echo "::error::No resume files to process."
-            exit 1
-          fi
-          
-          # For each .json file, download content from gist and save locally
-          while IFS= read -r file; do
-            filename=$(echo "$file" | tr -d '"')
-            echo "Processing $filename from gist..."
-            
-            # Get file content from gist
-            CONTENT_RESPONSE=$(curl -s -H "Authorization: token ${{ secrets.GIST_TOKEN }}" \
-              "https://api.github.com/gists/e597887d6598c25d2b880c079c6937fe/$filename")
-            
-            # Check if curl was successful
-            if echo "$CONTENT_RESPONSE" | jq -e '.content' > /dev/null 2>&1; then
-              CONTENT=$(echo "$CONTENT_RESPONSE" | jq -r '.content')
-              echo "$CONTENT" > "src/$filename"
-              echo "Successfully prepared src/$filename"
-            else
-              echo "::warning::Could not download $filename (may not exist in gist)"
-            fi
-          done <<< "$(echo "$RESUME_FILES" | jq -r '.[]')"
+          echo "Found resume files in gist:"
+          echo "$FILE_NAMES"
+          {
+            echo 'resume-files<<EOF'
+            printf '%s\n' "$FILE_NAMES" | jq -R -s 'split("\n") | map(select(length > 0))'
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
 
-      - name: Build all resumes from gist-sourced data
+      - name: Prepare resume data from gist
         run: |
-          # Build resumes using the data fetched from gist
-          echo "Starting resume build process..."
-          npm run build
+          # Delete checked-in JSON files so removed gist files cannot be built.
+          find src -maxdepth 1 -type f -name '*.json' -delete
 
-      - name: Update Gist metadata
-        id: gist
-        env:
-          GH_TOKEN: ${{ secrets.GIST_TOKEN }}
-        run: |
-          if [ -n "${{ secrets.GIST_ID }}" ]; then
-            curl -X PATCH \
-              -H "Authorization: token $GH_TOKEN" \
-              -H "Accept: application/vnd.github.v3+json" \
-              "https://api.github.com/gists/${{ secrets.GIST_ID }}" \
-              -d '{"description": "Ryan Wendell - JSON Resumes (updated by workflow)"}'
-            echo "gist-id=${{ secrets.GIST_ID }}" >> $GITHUB_OUTPUT
-          else
-            RESPONSE=$(curl -X POST \
-              -H "Authorization: token $GH_TOKEN" \
-              -H "Accept: application/vnd.github.v3+json" \
-              "https://api.github.com/gists" \
-              -d '{"public": true, "description": "Ryan Wendell - JSON Resumes", "files": {}}')
-            NEW_GIST_ID=$(echo "$RESPONSE" | jq -r .id)
-            echo "gist-id=$NEW_GIST_ID" >> $GITHUB_OUTPUT
-            echo "::notice::Created new gist: https://gist.github.com/$NEW_GIST_ID"
-          fi
+          jq -r '.files | keys[] | select(. != "JSON-RESUME" and endswith(".json"))' /tmp/resume-gist.json |
+          while IFS= read -r filename; do
+            jq -r --arg filename "$filename" '.files[$filename].content' /tmp/resume-gist.json > "src/$filename"
+            jq empty "src/$filename"
+            echo "Prepared src/$filename"
+          done
+
+      - name: Build all resumes from gist
+        run: npm run build
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -132,11 +84,9 @@ jobs:
           name: dist
           path: dist
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
+      - uses: actions/configure-pages@v4
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
 
@@ -146,13 +96,10 @@ jobs:
 
   deploy-to-github-io-repo:
     needs: build
+    if: vars.GH_IO_REPO != ''
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
     steps:
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           name: dist
           path: dist
@@ -161,7 +108,7 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         with:
           deploy_key: ${{ secrets.GH_IO_DEPLOY_KEY }}
-          external_repository: ${{ secrets.GH_IO_REPO }}
+          external_repository: ${{ vars.GH_IO_REPO }}
           publish_branch: main
           publish_dir: ./dist
-          commit_message: "Update resume from source repo"
+          commit_message: "Update resume from source gist"
