@@ -68,6 +68,24 @@
 			]
 		}
 	],
+	"projects": [
+		{
+			"name": "Meal Planner",
+			"description": "Full-stack collaborative application for planning household meals and generating shared shopping lists",
+			"highlights": [
+				"Delivered an end-to-end application with SvelteKit, TypeScript, Convex, and Tailwind CSS, including authentication, household onboarding, invitations, shared state, and responsive workflows.",
+				"Converted user needs around weekly meal planning into integrated meal, planner, leftover, and shopping-list experiences with practical edge-case handling for skipped meals.",
+				"Used AI as an implementation and debugging partner to move quickly from requirements to working features, validating its output through testing, review, and hands-on product feedback."
+			],
+			"keywords": [
+				"Requirements translation",
+				"TypeScript",
+				"SvelteKit",
+				"Convex",
+				"AI-assisted development"
+			]
+		}
+	],
 	"skills": [
 		{
 			"name": "Client Delivery",

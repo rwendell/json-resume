@@ -74,6 +74,22 @@
 	],
 	"projects": [
 		{
+			"name": "Meal Planner",
+			"description": "Full-stack household meal-planning application for managing recipes, weekly plans, leftovers, and shared grocery lists",
+			"highlights": [
+				"Built a multi-user meal-planning workflow with SvelteKit, TypeScript, Convex, and Tailwind CSS, including authentication, household invitations, shared planning, and real-time data synchronization.",
+				"Designed domain logic for meal scheduling, skipped slots, leftovers, and automatically grouped shopping lists to turn weekly plans into an actionable grocery workflow.",
+				"Used AI-assisted development as a force multiplier for prototyping, implementation, debugging, and iteration while retaining ownership of architecture, validation, and code quality."
+			],
+			"keywords": [
+				"TypeScript",
+				"SvelteKit",
+				"Convex",
+				"Tailwind CSS",
+				"AI-assisted development"
+			]
+		},
+		{
 			"name": "Gowall",
 			"description": "A wallpaper-centric Go utility featuring wallpaper color conversion, GAN-based upscaling, and hybrid VLM OCR",
 			"highlights": [

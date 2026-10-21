@@ -68,6 +68,25 @@
 			]
 		}
 	],
+	"projects": [
+		{
+			"name": "Meal Planner",
+			"description": "Full-stack household meal-planning application that turns shared weekly decisions into an actionable grocery workflow",
+			"highlights": [
+				"Defined and delivered a focused product experience spanning meal management, weekly planning, household collaboration, leftover tracking, and synchronized shopping lists.",
+				"Translated an everyday planning problem into clear workflows and domain rules, iterating on the experience with SvelteKit, TypeScript, Convex, and Tailwind CSS.",
+				"Used AI-assisted development to accelerate prototyping, explore implementation options, and resolve issues while directing product decisions, validating behavior, and reviewing the resulting code."
+			],
+			"keywords": [
+				"Product discovery",
+				"Workflow design",
+				"TypeScript",
+				"SvelteKit",
+				"Convex",
+				"AI-assisted development"
+			]
+		}
+	],
 	"skills": [
 		{
 			"name": "Project Management",
