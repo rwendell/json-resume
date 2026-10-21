@@ -88,10 +88,10 @@ function generateIndex(resumes) {
     function load(id) {
       const resume = resumes.find(item => item.id === id) || resumes[0];
       if (!resume) return;
-      frame.src = 'pages/' + resume.id + '.html';
+      frame.src = resume.id + '/' + resume.id + '.html';
       location.hash = resume.id;
       document.querySelectorAll('nav button').forEach(button => button.classList.toggle('active', button.dataset.resume === resume.id));
-      downloadBtn.href = 'pdf/' + resume.id + '.pdf';
+      downloadBtn.href = resume.id + '/' + resume.id + '.pdf';
       downloadBtn.download = resume.id + '.pdf';
       downloadBtn.classList.remove('hidden');
     }
