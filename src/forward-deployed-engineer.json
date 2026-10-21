@@ -1,0 +1,124 @@
+{
+	"$schema": "https://raw.githubusercontent.com/jsonresume/resume-schema/master/schema.json",
+	"basics": {
+		"name": "Ryan Wendell",
+		"label": "Forward-Deployed / Client Integration Engineer",
+		"email": "ryanjwendell@gmail.com",
+		"phone": "(224) 723-4213",
+		"url": "https://rwendell.github.io",
+		"summary": "Full-stack software engineer with 4+ years of experience delivering enterprise features, integrating APIs and data pipelines, and translating business needs into reliable technical solutions. Brings hands-on Java, TypeScript, React, SQL, and cloud experience together with cross-functional communication, requirements discovery, and client-oriented delivery.",
+		"location": {
+			"city": "Chicago",
+			"region": "Illinois",
+			"countryCode": "US"
+		},
+		"profiles": [
+			{
+				"network": "LinkedIn",
+				"username": "rjwendell",
+				"url": "https://www.linkedin.com/in/rjwendell/"
+			},
+			{
+				"network": "GitHub",
+				"username": "rwendell",
+				"url": "https://github.com/rwendell"
+			}
+		]
+	},
+	"work": [
+		{
+			"name": "Northern Trust",
+			"position": "Senior Associate - Software Engineer",
+			"url": "https://www.linkedin.com/company/3831/",
+			"startDate": "2022-08",
+			"endDate": "2026-02",
+			"summary": "Full-stack engineer delivering enterprise financial platform integrations and translating partner and stakeholder needs into production solutions.",
+			"highlights": [
+				"Led end-to-end delivery of large-scale features for global partners, from design and test-driven development through deployment and ongoing support.",
+				"Collaborated across departments to define API specifications, stored procedure interfaces, business logic, and expected outcomes for integrated solutions.",
+				"Translated business needs into technical requirements and iterative delivery plans while driving story creation, sprint refinement, and Agile execution for international integrations.",
+				"Developed full-stack features with TypeScript, React, and Redux on the frontend and Spring Boot with Java 21 on the backend, integrating with internal enterprise systems.",
+				"Optimized Oracle SQL schemas and stored procedures, JPA/Hibernate mappings, and high-throughput Apache Kafka pipelines processing 2.5M daily transactions.",
+				"Consolidated disparate historical storage into Snowflake on Azure, optimizing storage costs while maintaining high availability for cross-functional teams.",
+				"Built automated health-check tooling and validation scripts to detect and remediate deployment regressions, improving operational stability for supported solutions.",
+				"Produced system specifications, process flowcharts, maintenance guides, and troubleshooting strategies to support knowledge transfer and long-term customer and team support."
+			]
+		},
+		{
+			"name": "BluBracket (acquired by HashiCorp)",
+			"position": "Software Engineer Consultant",
+			"url": "https://www.linkedin.com/company/36107929/",
+			"startDate": "2021-12",
+			"endDate": "2022-06",
+			"summary": "Built security tooling and partnered with stakeholders to improve vulnerability detection, remediation, and enterprise product reliability.",
+			"highlights": [
+				"Built a React/Redux security dashboard for automated vulnerability detection and remediation across source code, developer environments, and CI/CD pipelines.",
+				"Resolved critical logic flaws in security risk-scoring algorithms, improving data accuracy and reducing false-positive alerts for enterprise clients.",
+				"Implemented Jest and Cypress testing suites to improve feature reliability and UI performance across staging and production environments.",
+				"Implemented keyboard navigation and ARIA attributes to support accessibility compliance and screen-reader users."
+			]
+		},
+		{
+			"name": "Impact Networking, LLC",
+			"position": "BPA Developer",
+			"url": "https://www.linkedin.com/company/44730/",
+			"startDate": "2021-03",
+			"endDate": "2021-12",
+			"summary": "Delivered tailored automation solutions by translating enterprise workflow needs into full-stack technical implementations.",
+			"highlights": [
+				"Orchestrated full-stack automation solutions with C#/.NET and SQL for enterprise workflows across OCR, HR, and fundraising departments.",
+				"Identified manual bottlenecks and delivered tailored solutions for a diverse portfolio of clients, including a non-profit medical organization."
+			]
+		}
+	],
+	"skills": [
+		{
+			"name": "Client & Product Delivery",
+			"keywords": ["Requirements Gathering", "Stakeholder Management", "API Specifications", "Technical Roadmaps", "Agile/Scrum Methodology", "Technical Documentation"]
+		},
+		{
+			"name": "Full-Stack Engineering",
+			"keywords": ["Java", "Spring Boot", "TypeScript", "JavaScript", "React", "Redux", "C#/.NET", "SQL", "JPA/Hibernate"]
+		},
+		{
+			"name": "Integrations & Data",
+			"keywords": ["REST APIs", "Apache Kafka", "Data Pipelines", "Oracle", "Snowflake", "Azure", "Automated Testing", "CI/CD"]
+		}
+	],
+	"projects": [
+		{
+			"name": "Gowall",
+			"description": "A wallpaper-centric Go utility featuring wallpaper color conversion, GAN-based upscaling, and hybrid VLM OCR",
+			"highlights": [
+				"1.4k GitHub stars",
+				"Built with Go, featuring GAN-based upscaling and hybrid VLM OCR"
+			],
+			"keywords": ["Go", "GAN", "VLM", "OCR"],
+			"url": "https://github.com/Achno/gowall"
+		},
+		{
+			"name": "slippi-postgame-cli",
+			"description": "CLI application that reads serial data and performs statistical analytics for Slippi replays",
+			"highlights": [
+				"Node.js, TypeScript, YARGS based CLI application that reads serial data and performs statistical analytics"
+			],
+			"keywords": ["Node.js", "TypeScript", "YARGS"],
+			"url": "https://github.com/rwendell/slippi-postgame-cli"
+		}
+	],
+	"education": [
+		{
+			"institution": "Iowa State University",
+			"area": "Computer Science",
+			"studyType": "BS",
+			"startDate": "2016-08",
+			"endDate": "2020-12"
+		}
+	],
+	"meta": {
+		"canonical": "https://gist.github.com/e597887d6598c25d2b880c079c6937fe",
+		"theme": "jsonresume-theme-straightforward",
+		"version": "v1.0.0",
+		"lastModified": "2026-10-21T00:00:00"
+	}
+}
