@@ -69,6 +69,7 @@ jobs:
 
   deploy-to-github-pages:
     needs: build
+    if: vars.PAGES_ENABLED == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
