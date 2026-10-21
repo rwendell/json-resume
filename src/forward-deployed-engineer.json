@@ -5,7 +5,6 @@
 		"label": "Forward-Deployed Engineer",
 		"email": "ryanjwendell@gmail.com",
 		"phone": "(224) 723-4213",
-		"url": "https://rwendell.github.io",
 		"summary": "Software engineer with 5 years of experience building enterprise features, integrations, and data pipelines. Experienced translating business needs into reliable technical solutions and working across teams; now pursuing forward-deployed, implementation, and other client-facing engineering roles.",
 		"location": {
 			"city": "Chicago",
@@ -63,8 +62,7 @@
 			"endDate": "2021-12",
 			"summary": "Delivered tailored automation solutions by translating enterprise workflow needs into full-stack technical implementations.",
 			"highlights": [
-				"Orchestrated full-stack automation solutions with C#/.NET and SQL for enterprise workflows across OCR, HR, and fundraising departments.",
-				"Identified manual bottlenecks and delivered tailored solutions for a diverse portfolio of clients, including a non-profit medical organization."
+				"Orchestrated full-stack automation solutions with C#/.NET and SQL for enterprise workflows across OCR, HR, and fundraising departments."
 			]
 		}
 	],
@@ -73,9 +71,8 @@
 			"name": "Meal Planner",
 			"description": "Full-stack collaborative application for planning household meals and generating shared shopping lists",
 			"highlights": [
-				"Delivered an end-to-end application with SvelteKit, TypeScript, Convex, and Tailwind CSS, including authentication, household onboarding, invitations, shared state, and responsive workflows.",
-				"Converted user needs around weekly meal planning into integrated meal, planner, leftover, and shopping-list experiences with practical edge-case handling for skipped meals.",
-				"Used AI as an implementation and debugging partner to move quickly from requirements to working features, validating its output through testing, review, and hands-on product feedback."
+				"Delivered an end-to-end application with SvelteKit, TypeScript, and Convex, including authentication, household onboarding, invitations, and shared planning.",
+				"Used AI as an implementation and debugging partner to move from requirements to working features, validating its output through testing, review, and product feedback."
 			],
 			"keywords": [
 				"Requirements translation",
@@ -84,16 +81,6 @@
 				"Convex",
 				"AI-assisted development"
 			]
-		}
-	],
-	"skills": [
-		{
-			"name": "Client Delivery",
-			"keywords": ["Requirements Gathering", "Stakeholder Management", "API Specifications", "Agile/Scrum Methodology"]
-		},
-		{
-			"name": "Full-Stack Engineering",
-			"keywords": ["Java", "Spring Boot", "TypeScript", "React", "Redux", "C#/.NET", "SQL"]
 		}
 	],
 	"education": [

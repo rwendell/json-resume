@@ -5,7 +5,6 @@
 		"label": "Senior Software Engineer",
 		"email": "ryanjwendell@gmail.com",
 		"phone": "(224) 723-4213",
-		"url": "https://rwendell.github.io",
 		"summary": "Software engineer with 5 years of experience building full-stack features, integrations, and data pipelines for enterprise platforms. Experienced translating business needs into reliable technical solutions and collaborating across teams; now pursuing client-facing engineering, implementation, and technical product roles.",
 		"location": {
 			"city": "Chicago",
@@ -37,12 +36,9 @@
 				"Led the end-to-end lifecycle of large-scale features for global partners, overseeing design, test driven development (JUnit, Jest), deployment, and ongoing support across cross-functional teams.",
 				"Established functional requirements by collaborating across departments on API specifications, stored procedure interfaces, business logic, and expected outcomes to ensure solutions aligned with organizational needs.",
 				"Streamlined data operations by consolidating disparate historical storage into Snowflake on Azure, optimizing storage costs while ensuring high availability for cross-functional teams.",
-				"Drove Agile methodology adoption through story creation, sprint refinement, and iterative delivery for international integrations.",
-				"Produced technical documentation including system specifications, process flowcharts, and maintenance guides to support knowledge transfer and long-term maintainability.",
 				"Improved operational stability by conducting system analysis and engineering automated health-check tooling and validation scripts to proactively detect and remediate deployment regressions.",
 				"Optimized application performance through advanced Oracle SQL schema design, stored procedure development, JPA/Hibernate ORM for efficient entity mapping and query optimization, and high-throughput multi-threaded Apache Kafka pipelines processing 2.5M daily transactions.",
 				"Developed full-stack features using TypeScript, React, and Redux on the frontend and Spring Boot with Java 21 on the backend, integrating with internal enterprise systems.",
-				"Mentored and supported junior developers through code reviews, technical guidance, and documented troubleshooting strategies to elevate team capability.",
 				"Evaluated and applied emerging technologies and frameworks to continuously improve software quality and development processes."
 			]
 		},
@@ -75,11 +71,9 @@
 	"projects": [
 		{
 			"name": "Meal Planner",
-			"description": "Full-stack household meal-planning application for managing recipes, weekly plans, leftovers, and shared grocery lists",
+			"description": "Full-stack household meal-planning application",
 			"highlights": [
-				"Built a multi-user meal-planning workflow with SvelteKit, TypeScript, Convex, and Tailwind CSS, including authentication, household invitations, shared planning, and real-time data synchronization.",
-				"Designed domain logic for meal scheduling, skipped slots, leftovers, and automatically grouped shopping lists to turn weekly plans into an actionable grocery workflow.",
-				"Used AI-assisted development as a force multiplier for prototyping, implementation, debugging, and iteration while retaining ownership of architecture, validation, and code quality."
+				"Built a multi-user SvelteKit/TypeScript/Convex app and used AI-assisted development for implementation, debugging, and iteration."
 			],
 			"keywords": [
 				"TypeScript",
@@ -88,47 +82,6 @@
 				"Tailwind CSS",
 				"AI-assisted development"
 			]
-		},
-		{
-			"name": "Gowall",
-			"description": "A wallpaper-centric Go utility featuring wallpaper color conversion, GAN-based upscaling, and hybrid VLM OCR",
-			"highlights": [
-				"1.4k GitHub stars",
-				"Built with Go, featuring GAN-based upscaling and hybrid VLM OCR"
-			],
-			"keywords": [
-				"Go",
-				"GAN",
-				"VLM",
-				"OCR"
-			],
-			"url": "https://github.com/Achno/gowall"
-		},
-		{
-			"name": "slippi-postgame-cli",
-			"description": "CLI application that reads serial data and performs statistical analytics for Slippi replays",
-			"highlights": [
-				"Node.js, TypeScript, YARGS based CLI application that reads serial data and performs statistical analytics"
-			],
-			"keywords": [
-				"Node.js",
-				"TypeScript",
-				"YARGS"
-			],
-			"url": "https://github.com/rwendell/slippi-postgame-cli"
-		},
-		{
-			"name": "gc-adapter",
-			"description": "WebUSB implementation for reading inputs from a GameCube adapter",
-			"highlights": [
-				"Node.js, TypeScript, WebUSB implementation for reading inputs from a GameCube adapter"
-			],
-			"keywords": [
-				"Node.js",
-				"TypeScript",
-				"WebUSB"
-			],
-			"url": "https://github.com/rwendell/gc-adapter"
 		}
 	],
 	"education": [
