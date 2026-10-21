@@ -38,7 +38,8 @@
 				"Translated business needs into technical requirements and iterative delivery plans while driving story creation, sprint refinement, and Agile execution for international integrations.",
 				"Developed full-stack features with TypeScript, React, and Redux on the frontend and Spring Boot with Java 21 on the backend, integrating with internal enterprise systems.",
 				"Optimized Oracle SQL schemas and stored procedures, JPA/Hibernate mappings, and high-throughput Apache Kafka pipelines processing 2.5M daily transactions.",
-				"Built automated health-check tooling and validation scripts to detect and remediate deployment regressions, improving operational stability for supported solutions."
+				"Built automated health-check tooling and validation scripts to detect and remediate deployment regressions, improving operational stability for supported solutions.",
+				"Harnessed large language models (LLMs) to accelerate technical discovery and implementation while validating outputs against requirements and production constraints."
 			]
 		},
 		{
@@ -71,15 +72,15 @@
 			"name": "Meal Planner",
 			"description": "Full-stack collaborative application for planning household meals and generating shared shopping lists",
 			"highlights": [
-				"Delivered an end-to-end application with SvelteKit, TypeScript, and Convex, including authentication, household onboarding, invitations, and shared planning.",
-				"Used AI as an implementation and debugging partner to move from requirements to working features, validating its output through testing, review, and product feedback."
+				"Delivered an end-to-end application with SvelteKit, TypeScript, and Convex, including authentication, household onboarding, invitations, and shared planning",
+				"Harnessed large language models (LLMs) as an implementation and debugging partner, validating outputs through testing, review, and product feedback"
 			],
 			"keywords": [
 				"Requirements translation",
 				"TypeScript",
 				"SvelteKit",
 				"Convex",
-				"AI-assisted development"
+				"Large language models (LLMs)"
 			]
 		}
 	],

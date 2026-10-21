@@ -39,7 +39,7 @@
 				"Improved operational stability by conducting system analysis and engineering automated health-check tooling and validation scripts to proactively detect and remediate deployment regressions.",
 				"Optimized application performance through advanced Oracle SQL schema design, stored procedure development, JPA/Hibernate ORM for efficient entity mapping and query optimization, and high-throughput multi-threaded Apache Kafka pipelines processing 2.5M daily transactions.",
 				"Developed full-stack features using TypeScript, React, and Redux on the frontend and Spring Boot with Java 21 on the backend, integrating with internal enterprise systems.",
-				"Evaluated and applied emerging technologies and frameworks to continuously improve software quality and development processes."
+				"Harnessed large language models (LLMs) to accelerate code exploration, implementation, debugging, and test iteration while applying engineering judgment to validate their output."
 			]
 		},
 		{
@@ -73,14 +73,14 @@
 			"name": "Meal Planner",
 			"description": "Full-stack household meal-planning application",
 			"highlights": [
-				"Built a multi-user SvelteKit/TypeScript/Convex app and used AI-assisted development for implementation, debugging, and iteration."
+				"Built a multi-user SvelteKit/TypeScript/Convex app by harnessing large language models (LLMs) for implementation, debugging, and iteration"
 			],
 			"keywords": [
 				"TypeScript",
 				"SvelteKit",
 				"Convex",
 				"Tailwind CSS",
-				"AI-assisted development"
+				"Large language models (LLMs)"
 			]
 		}
 	],

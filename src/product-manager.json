@@ -38,7 +38,7 @@
 				"Conducted interviews with internal and external users to define business logic and API specifications, translating high-level business needs into detailed technical roadmaps.",
 				"Managed the development of data pipelines processing 2.5M daily transactions, ensuring product stability and high-performance throughput for enterprise users.",
 				"Directed the development of automated visualization tools and diagnostic utilities, reducing system regressions and improving the overall stability and UX for global partners.",
-				"Established and documented troubleshooting frameworks and maintenance processes to ensure seamless internal knowledge transfer and long-term product support."
+				"Harnessed large language models (LLMs) to accelerate requirements exploration and technical discovery while validating outputs against product goals and stakeholder needs."
 			]
 		},
 		{
@@ -72,8 +72,8 @@
 			"name": "Meal Planner",
 			"description": "Full-stack household meal-planning application that turns shared weekly decisions into an actionable grocery workflow",
 			"highlights": [
-				"Defined and delivered a focused product experience spanning meal management, weekly planning, household collaboration, leftover tracking, and synchronized shopping lists.",
-				"Used AI-assisted development to accelerate prototyping and resolve issues while directing product decisions, validating behavior, and reviewing the resulting code."
+				"Defined and delivered a focused product experience spanning meal management, weekly planning, household collaboration, leftover tracking, and synchronized shopping lists",
+				"Harnessed large language models (LLMs) to accelerate prototyping and resolve issues while directing product decisions, validating behavior, and reviewing the resulting code"
 			],
 			"keywords": [
 				"Product discovery",
@@ -81,7 +81,7 @@
 				"TypeScript",
 				"SvelteKit",
 				"Convex",
-				"AI-assisted development"
+				"Large language models (LLMs)"
 			]
 		}
 	],
