@@ -1,6 +1,6 @@
 # JSON Resume Builder
 
-This repository is the source of truth for Ryan Wendell's resumes. It generates HTML and PDF files, publishes them to `rwendell.github.io`, and mirrors the JSON files to a public GitHub Gist for sharing.
+This repo generates HTML and PDF files, publishes them to `rwendell.github.io`, and mirrors the JSON files to a public GitHub Gist for sharing.
 
 ## Architecture
 
@@ -12,8 +12,6 @@ GitHub Actions
         ├── rwendell.github.io
         └── public JSON Resume gist
 ```
-
-The gist (`e597887d6598c25d2b880c079c6937fe`) is a generated mirror, not an editing location. `JSON-RESUME` is preserved in the gist, while JSON resume files are synchronized dynamically from `src/`.
 
 ## Resume data
 
@@ -57,32 +55,8 @@ Generated files are placed in `dist/<resume>/` and `dist/index.html`.
 Themes can be passed to render commands:
 
 ```bash
-aube run render -- barista jsonresume-theme-even
+aube run render -- software-engineer jsonresume-theme-even
 ```
-
-## Publishing
-
-Push changes to `main`:
-
-```bash
-git add src/
-git commit -m "Update resume"
-git push
-```
-
-The workflow validates every JSON file, builds all output and the dynamic index, updates the public gist mirror, and deploys `dist/` to the configured `rwendell.github.io` repository.
-
-## GitHub configuration
-
-For gist mirroring, add the repository secret `GIST_TOKEN` with a GitHub token that has `gist` permission.
-
-For the external Pages repository, add:
-
-- Repository variable `GH_IO_REPO`, such as `rwendell/rwendell.github.io`
-
-The `GIST_TOKEN` is also used as the repository token for the external deployment; it needs access to both the gist and the target repository.
-
-The built-in GitHub Pages deployment is disabled unless the `PAGES_ENABLED` repository variable is set to `true`.
 
 ## Project structure
 
