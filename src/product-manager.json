@@ -2,11 +2,11 @@
 	"$schema": "https://raw.githubusercontent.com/jsonresume/resume-schema/master/schema.json",
 	"basics": {
 		"name": "Ryan Wendell",
-		"label": "Product Manager",
+		"label": "Technical Product Engineer",
 		"email": "ryanjwendell@gmail.com",
 		"phone": "(224) 723-4213",
 		"url": "https://rwendell.github.io",
-		"summary": "Product Manager with 4+ years of experience delivering enterprise-scale features and managing cross-functional teams. Proven track record of translating business needs into technical roadmaps, facilitating Agile ceremonies, and driving product stability through data-driven decision making.",
+		"summary": "Software engineer with 5 years of experience delivering enterprise features, integrations, and data pipelines while working closely with technical and non-technical stakeholders. Experienced translating business needs into technical requirements and delivery plans, and now transitioning into Technical Product Management.",
 		"location": {
 			"city": "Chicago",
 			"region": "Illinois",
