@@ -79,7 +79,8 @@ For gist mirroring, add the repository secret `GIST_TOKEN` with a GitHub token t
 For the external Pages repository, add:
 
 - Repository variable `GH_IO_REPO`, such as `rwendell/rwendell.github.io`
-- Repository secret `GH_IO_DEPLOY_KEY`
+
+The `GIST_TOKEN` is also used as the repository token for the external deployment; it needs access to both the gist and the target repository.
 
 The built-in GitHub Pages deployment is disabled unless the `PAGES_ENABLED` repository variable is set to `true`.
 

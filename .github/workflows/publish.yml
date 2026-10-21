@@ -106,7 +106,7 @@ jobs:
       - name: Deploy to github.io repo
         uses: peaceiris/actions-gh-pages@v4
         with:
-          deploy_key: ${{ secrets.GH_IO_DEPLOY_KEY }}
+          personal_token: ${{ secrets.GIST_TOKEN }}
           external_repository: ${{ vars.GH_IO_REPO }}
           publish_branch: main
           publish_dir: ./dist
