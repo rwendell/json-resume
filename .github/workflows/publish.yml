@@ -25,16 +25,30 @@ jobs:
         id: fetch-gist-files
         run: |
           # Get all files from YOUR specific gist
+          echo "Fetching files from gist..."
           GIST_DATA=$(curl -H "Authorization: token ${{ secrets.GIST_TOKEN }}" \
             "https://api.github.com/gists/e597887d6598c25d2b880c079c6937fe")
           
-          # Extract file names and filter out JSON-RESUME
-          FILE_NAMES=$(echo "$GIST_DATA" | jq -r '.files | keys[]')
+          # Check if we got valid data
+          if [ "$GIST_DATA" = "" ] || [ "$GIST_DATA" = "null" ]; then
+            echo "::error::Failed to fetch gist data. Check GIST_TOKEN secret."
+            exit 1
+          fi
           
-          # Filter for valid resume JSON files only
-          RESUME_FILES=$(echo "$FILE_NAMES" | grep -E '^(barista|product-manager|software-engineer)\.json$' | jq -R . | jq -s .)
+          # Extract all .json files from gist
+          FILE_NAMES=$(echo "$GIST_DATA" | jq -r '.files | to_entries[] | select(.key | endswith(".json")) | .key')
           
-          echo "Found resume files in gist: $RESUME_FILES"
+          if [ "$FILE_NAMES" = "" ]; then
+            echo "::error::No .json files found in gist."
+            exit 1
+          fi
+          
+          echo "Found files in gist: $FILE_NAMES"
+          
+          # All .json files are potential resume files
+          RESUME_FILES=$(echo "$FILE_NAMES" | jq -R . | jq -s .)
+          
+          echo "Processing resume files: $RESUME_FILES"
           echo "resume-files=$RESUME_FILES" >> $GITHUB_OUTPUT
 
       - name: Download and prepare resume data
@@ -42,24 +56,34 @@ jobs:
         run: |
           RESUME_FILES="${{ steps.fetch-gist-files.outputs.resume-files }}"
           
-          # For each resume file, download content from gist and save locally
+          if [ "$RESUME_FILES" = "" ] || [ "$RESUME_FILES" = "null" ]; then
+            echo "::error::No resume files to process."
+            exit 1
+          fi
+          
+          # For each .json file, download content from gist and save locally
           while IFS= read -r file; do
             filename=$(echo "$file" | tr -d '"')
-            echo "Downloading $filename from gist..."
+            echo "Processing $filename from gist..."
             
             # Get file content from gist
-            CONTENT=$(curl -H "Authorization: token ${{ secrets.GIST_TOKEN }}" \
-              "https://api.github.com/gists/e597887d6598c25d2b880c079c6937fe/${filename}" | \
-              jq -r '.content')
+            CONTENT_RESPONSE=$(curl -s -H "Authorization: token ${{ secrets.GIST_TOKEN }}" \
+              "https://api.github.com/gists/e597887d6598c25d2b880c079c6937fe/$filename")
             
-            # Save to src/ directory for building
-            echo "$CONTENT" > "src/$filename"
-            echo "Prepared src/$filename"
+            # Check if curl was successful
+            if echo "$CONTENT_RESPONSE" | jq -e '.content' > /dev/null 2>&1; then
+              CONTENT=$(echo "$CONTENT_RESPONSE" | jq -r '.content')
+              echo "$CONTENT" > "src/$filename"
+              echo "Successfully prepared src/$filename"
+            else
+              echo "::warning::Could not download $filename (may not exist in gist)"
+            fi
           done <<< "$(echo "$RESUME_FILES" | jq -r '.[]')"
 
       - name: Build all resumes from gist-sourced data
         run: |
           # Build resumes using the data fetched from gist
+          echo "Starting resume build process..."
           npm run build
 
       - name: Update Gist metadata
