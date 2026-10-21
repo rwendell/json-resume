@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       gist-id: ${{ steps.gist.outputs.gist-id }}
+      resume-files: ${{ steps.fetch-gist-files.outputs.resume-files }}
     steps:
       - uses: actions/checkout@v4
 
@@ -20,40 +21,65 @@ jobs:
 
       - run: npm ci
 
-      - name: Build all resumes (HTML + PDF)
-        run: npm run build
+      - name: Fetch resume files from gist (source of truth)
+        id: fetch-gist-files
+        run: |
+          # Get all files from gist
+          GIST_DATA=$(curl -H "Authorization: token ${{ secrets.GIST_TOKEN }}" \
+            "https://api.github.com/gists/${{ secrets.GIST_ID }}")
+          
+          # Extract file names and filter out JSON-RESUME
+          FILE_NAMES=$(echo "$GIST_DATA" | jq -r '.files | keys[]')
+          
+          # Filter for valid resume JSON files only
+          RESUME_FILES=$(echo "$FILE_NAMES" | grep -E '^(barista|product-manager|software-engineer)\.json$' | jq -R . | jq -s .)
+          
+          echo "Found resume files in gist: $RESUME_FILES"
+          echo "resume-files=$RESUME_FILES" >> $GITHUB_OUTPUT
 
-      - name: Update Gist with JSON Resumes
+      - name: Download and prepare resume data
+        id: prepare-data
+        run: |
+          RESUME_FILES="${{ steps.fetch-gist-files.outputs.resume-files }}"
+          
+          # For each resume file, download content from gist and save locally
+          while IFS= read -r file; do
+            filename=$(echo "$file" | tr -d '"')
+            echo "Downloading $filename from gist..."
+            
+            # Get file content from gist
+            CONTENT=$(curl -H "Authorization: token ${{ secrets.GIST_TOKEN }}" \
+              "https://api.github.com/gists/${{ secrets.GIST_ID }}/${filename}" | \
+              jq -r '.content')
+            
+            # Save to src/ directory for building
+            echo "$CONTENT" > "src/$filename"
+            echo "Prepared src/$filename"
+          done <<< "$(echo "$RESUME_FILES" | jq -r '.[]')"
+
+      - name: Build all resumes from gist-sourced data
+        run: |
+          # Build resumes using the data fetched from gist
+          npm run build
+
+      - name: Update Gist metadata
         id: gist
         env:
           GH_TOKEN: ${{ secrets.GIST_TOKEN }}
         run: |
-          # Create or update gist with all JSON files
-          FILES_JSON=$(jq -n \
-            --arg barista "$(jq -c . src/barista.json)" \
-            --arg pm "$(jq -c . src/product-manager.json)" \
-            --arg se "$(jq -c . src/software-engineer.json)" \
-            '{
-              "barista.json": {"content": $barista},
-              "product-manager.json": {"content": $pm},
-              "software-engineer.json": {"content": $se}
-            }')
-
           if [ -n "${{ secrets.GIST_ID }}" ]; then
-            # Update existing gist
             curl -X PATCH \
               -H "Authorization: token $GH_TOKEN" \
               -H "Accept: application/vnd.github.v3+json" \
               "https://api.github.com/gists/${{ secrets.GIST_ID }}" \
-              -d "{\"files\": $FILES_JSON}"
+              -d '{"description": "Ryan Wendell - JSON Resumes (updated by workflow)"}'
             echo "gist-id=${{ secrets.GIST_ID }}" >> $GITHUB_OUTPUT
           else
-            # Create new gist
             RESPONSE=$(curl -X POST \
               -H "Authorization: token $GH_TOKEN" \
               -H "Accept: application/vnd.github.v3+json" \
               "https://api.github.com/gists" \
-              -d "{\"public\": true, \"description\": \"Ryan Wendell - JSON Resumes\", \"files\": $FILES_JSON}")
+              -d '{"public": true, "description": "Ryan Wendell - JSON Resumes", "files": {}}')
             NEW_GIST_ID=$(echo "$RESPONSE" | jq -r .id)
             echo "gist-id=$NEW_GIST_ID" >> $GITHUB_OUTPUT
             echo "::notice::Created new gist: https://gist.github.com/$NEW_GIST_ID"

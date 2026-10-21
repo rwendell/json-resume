@@ -4,20 +4,51 @@ A system for generating professional resumes from JSON data, using a modular arc
 
 ## Architecture Overview
 
-This project uses a two-part setup:
+This project uses a new dynamic architecture:
 
-1. **GitHub Gists** (`gists/json-resume/`): Stores the actual resume JSON data
-2. **This Repository** (`json-resume/`): Generates HTML/PDF resumes from the JSON data
+1. **GitHub Gist** (`gists/json-resume/`) - **SOURCE OF TRUTH**: Stores all resume JSON data
+2. **This Repository** (`json-resume/`) - Generates HTML/PDF resumes from gist data
+3. **GitHub Pages** (`rwendell.github.io/`) - Hosts the generated resumes
 
-The generated resumes are deployed to GitHub Pages (`rwendell.github.io/`).
+## How It Works
+
+The workflow now reads directly from the gist as the single source of truth:
+
+1. **Fetch resume files**: Queries the gist API to discover available resumes
+2. **Exclude non-resume files**: Filters out `JSON-RESUME` and other irrelevant files
+3. **Download and prepare**: Downloads resume content from the gist to `src/`
+4. **Generate resumes**: Builds HTML/PDF files from the gist-sourced data
+5. **Update metadata**: Updates gist description only (preserves file history)
 
 ## Available Resumes
 
+The available resumes are determined by what JSON files exist in the gist:
 - **Software Engineer** - Ryan Wendell's primary tech role resume
-- **Product Manager** - Ryan's product management experience
+- **Product Manager** - Ryan's product management experience  
 - **Barista** - Ryan's earlier coffee shop experience
 
 Each resume includes work history, education, skills, projects, and volunteer experience.
+
+## Dynamic Behavior
+
+✅ **Source of truth**: The gist controls which resumes exist
+✅ **Auto-sync**: Adding/removing files in the gist automatically updates generated resumes
+✅ **Clean separation**: Non-resume files (like `JSON-RESUME`) are excluded
+✅ **No data loss**: Existing file history is preserved
+
+## Management Workflow
+
+**To add a new resume:**
+1. Add the JSON file directly to the gist
+2. Push to this repository (triggers workflow)
+3. Resume is automatically generated and deployed
+
+**To remove a resume:**
+1. Delete the JSON file from the gist
+2. Push to this repository (triggers workflow)
+3. Resume generation stops automatically
+
+**For documentation:** Store non-resume files like `JSON-RESUME` in the gist - they're excluded from processing.
 
 ## Usage
 
