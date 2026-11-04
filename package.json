@@ -18,7 +18,8 @@
 		"sync-github": "node scripts/sync-github.mjs",
 		"sync-local": "node scripts/sync-local-projects.mjs",
 		"verify-resume": "node scripts/verify-resume.mjs",
-		"clean-cache": "node scripts/clean-cache.mjs"
+		"clean-cache": "node scripts/clean-cache.mjs",
+		"pull-private": "node scripts/pull-private.mjs"
 	},
 	"devDependencies": {
 		"jsonresume-theme-straightforward": "^0.5.0",

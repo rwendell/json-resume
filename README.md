@@ -489,6 +489,38 @@ unfamiliar technology online. Web content can shape wording and context, but it
 is never evidence for a claim about your experience. The fact bank and project
 candidates remain the only sources for candidate facts.
 
+### Pull the private PII overlay from a secret gist
+
+Keep `data/career.private.yml` in a secret gist and pull it down on another
+machine:
+
+```bash
+aube run pull-private
+```
+
+The command resolves the gist in this order:
+
+1. `--gist <id|url>`
+2. `CAREER_PRIVATE_GIST_ID`
+3. the newest secret gist containing `career.private.yml`
+
+```bash
+aube run pull-private -- --gist <id|url>
+export CAREER_PRIVATE_GIST_ID=<id>
+```
+
+Create or update the gist with the GitHub CLI:
+
+```bash
+gh gist create data/career.private.yml
+gh gist edit <id> --filename career.private.yml data/career.private.yml
+```
+
+`gh gist create` creates a secret gist by default. The pull command refuses
+public gists unless `--allow-public` is passed, validates the YAML before
+writing, never prints the contents, and backs up a changed local file under
+`.cache/pull-private/`.
+
 ## Project sources
 
 `aube run tailor` refreshes project metadata automatically when it is missing or
@@ -562,6 +594,7 @@ contain private org READMEs and local project paths. Do not commit them.
 | `aube run verify-resume -- <file or slug>` | Verify a generated resume and trace |
 | `aube run sync-github` | Refresh GitHub, org, and local project metadata |
 | `aube run sync-local` | Refresh only local `~/projects` metadata |
+| `aube run pull-private` | Pull the private PII overlay from a secret gist |
 | `aube run clean-cache` | Remove all intermediate resume JSON |
 
 Common `tailor` options:
@@ -704,6 +737,7 @@ scripts/sync-github.mjs       GitHub/org metadata sync + local trigger
 scripts/sync-local-projects.mjs Local ~/projects discovery
 scripts/tailor.mjs            Job -> one-page PDF orchestration
 scripts/answer.mjs            Job/question -> grounded application answer
+scripts/pull-private.mjs       Pull private PII overlay from a secret gist
 scripts/score-projects.mjs    Project scoring explainer
 scripts/verify-resume.mjs     Schema, trace, evidence, and one-page checks
 scripts/clean-cache.mjs       Remove intermediate resume cache
