@@ -4,8 +4,8 @@ This repo keeps your manually written resumes in `src/` and generates tailored
 resumes for specific jobs from:
 
 - `data/career.yml` — your public career fact bank
-- `data/career.private.yml` — optional gitignored private overlay for the full
-  fact bank
+- `data/career.private.yml` — optional gitignored PII overlay (name, contact
+  details, location)
 - `data/github.json` and `data/local-projects.json` — your GitHub, org, and
   local projects
 - a job URL or job description file
@@ -422,34 +422,23 @@ script directly.
 
 ## Edit your career fact bank
 
-`data/career.yml` is the public source of truth for generated resumes. It is
-safe to commit: keep only facts you are comfortable publishing there.
+`data/career.yml` is the public source of truth for generated resumes. It
+contains roles, achievements, projects, skills, education, constraints, and
+transferable terms, and is safe to commit.
 
-Put private achievements, constraints, and source configuration in
-`data/career.private.yml`. That file is gitignored and merged over the public
-file at runtime, so you do not repeat public role metadata:
-
-```yaml
-# data/career.yml — public
-roles:
-  - id: northern-trust
-    company: Northern Trust
-    position: Senior Associate - Software Engineer
-    startDate: 2022-08
-    endDate: 2026-02
-```
+Keep PII in `data/career.private.yml`: your name, email, phone, and location.
+That file is gitignored and merged over the public file at runtime:
 
 ```yaml
 # data/career.private.yml — private, gitignored
-roles:
-  - id: northern-trust
-    achievements:
-      - id: nt-kafka
-        text: >-
-          Optimized Oracle SQL schemas and stored procedures, JPA/Hibernate
-          mappings, and high-throughput Apache Kafka pipelines processing 2.5M
-          daily transactions.
-        skills: [oracle-sql, sql, jpa, hibernate, kafka, performance]
+basics:
+  name: Your Name
+  email: you@example.com
+  phone: (555) 555-5555
+  location:
+    city: Your City
+    region: Your State
+    countryCode: US
 ```
 
 Arrays merge by `id` for roles, achievements, projects, and education; by
@@ -458,7 +447,23 @@ arrays such as `constraints` and `exclude` are unioned. Scalar values in the
 private file override the public file.
 
 Each achievement needs a stable `id` so the verifier can prove the generated
-bullet is grounded.
+bullet is grounded:
+
+```yaml
+roles:
+  - id: northern-trust
+    company: Northern Trust
+    position: Senior Associate - Software Engineer
+    startDate: 2022-08
+    endDate: 2026-02
+    achievements:
+      - id: nt-kafka
+        text: >-
+          Optimized Oracle SQL schemas and stored procedures, JPA/Hibernate
+          mappings, and high-throughput Apache Kafka pipelines processing 2.5M
+          daily transactions.
+        skills: [oracle-sql, sql, jpa, hibernate, kafka, performance]
+```
 
 Rules that keep the output trustworthy:
 
@@ -619,9 +624,13 @@ aube run render -- software-engineer jsonresume-theme-even
   the website and gist. Do not put tailored resumes in `src/`.
 - `data/github.json` and `data/local-projects.json` are gitignored because they
   can contain private organization READMEs and local project paths.
-- `data/career.yml` is **public**. Keep only facts that are safe to publish
-  there. Private achievements, constraints, and source configuration belong in
-  `data/career.private.yml`, which is gitignored and merged at runtime.
+- `data/career.yml` is **public** and contains your roles, achievements,
+  projects, skills, education, and constraints. PII — name, email, phone, and
+  location — belongs in `data/career.private.yml`, which is gitignored and
+  merged at runtime.
+- `src/*.json` intentionally contains the contact details used by the published
+  resumes. If you want to remove PII from the live site, sanitize those files
+  too.
 - Removing private data from a tracked file does not remove it from existing
   Git history. Rewrite history if private data was pushed.
 - Provider credentials live in OpenCode's auth store or your environment. Do not
@@ -670,8 +679,8 @@ for inspection.
 
 **The PDF is too sparse.** `tailor` first tries unused achievements from
 the merged fact bank to fill the page. If none fit, add more achievements to
-`data/career.yml` or `data/career.private.yml` (or a relevant project) and
-regenerate. It will not silently ship a mostly-empty page.
+`data/career.yml` (or a relevant project) and regenerate. It will not silently
+ship a mostly-empty page.
 
 **The preview does not open.** `tailor` tries `open`, `xdg-open`, `kde-open`,
 and other common desktop openers. If none are available, open the printed file
@@ -681,7 +690,7 @@ path manually or pass `--no-open`.
 
 ```text
 data/career.yml               Public career fact bank
-data/career.private.yml       Private fact-bank overlay (gitignored)
+data/career.private.yml       Private PII overlay (gitignored)
 data/github.json              Synced GitHub/org metadata (gitignored)
 data/local-projects.json      Scanned ~/projects metadata (gitignored)
 generated/resumes/            Private tailored PDFs (gitignored)

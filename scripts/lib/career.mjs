@@ -8,10 +8,10 @@ export const PRIVATE_CAREER_FILE = 'data/career.private.yml';
 /**
  * Load the public fact bank and merge the optional private overlay.
  *
- * The public file is safe to commit. The private file is gitignored and can
- * add achievements, projects, constraints, and source configuration without
- * duplicating the public base. Arrays merge by id/name/evidence so private
- * additions extend the public data instead of replacing it.
+ * The public file is safe to commit. The private file is gitignored and holds
+ * PII (name, contact details, location) or other values that should not be
+ * published. Arrays merge by id/name/evidence so private additions extend the
+ * public data instead of replacing it.
  */
 export function loadCareer(rootDir, { optional = false } = {}) {
   const publicPath = resolve(rootDir, PUBLIC_CAREER_FILE);

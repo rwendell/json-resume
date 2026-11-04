@@ -1,3 +1,8 @@
+# Public career facts: roles, achievements, projects, skills, and
+# configuration. Keep PII (name, contact details, location) out of this file.
+# PII lives in data/career.private.yml, which is gitignored and merged at
+# runtime.
+
 version: 1
 basics:
   url: https://rwendell.github.io/
@@ -39,6 +44,139 @@ roles:
     endDate: 2026-02
     summary: Full-stack engineer on enterprise financial platforms, leading feature
       delivery and cross-functional collaboration across international teams.
+    achievements:
+      - id: nt-e2e-delivery
+        text: Led end-to-end delivery of production features and integrations, from
+          requirements and API design through testing, deployment, monitoring,
+          and support.
+        skills:
+          - delivery
+          - api-design
+          - testing
+          - deployment
+          - monitoring
+          - support
+        strength: 5
+      - id: nt-requirements
+        text: Defined API specifications, stored procedure interfaces, business logic,
+          validation rules, and expected outcomes by collaborating across
+          technical and business departments.
+        skills:
+          - requirements
+          - api-design
+          - sql
+          - stakeholder-collaboration
+        strength: 5
+      - id: nt-fullstack
+        text: Developed full-stack features using TypeScript, React, and Redux on the
+          frontend and Spring Boot with Java 21 on the backend, integrating with
+          internal enterprise systems.
+        skills:
+          - typescript
+          - react
+          - redux
+          - spring-boot
+          - java
+          - full-stack
+          - integrations
+        strength: 5
+      - id: nt-kafka
+        text: Optimized Oracle SQL schemas and stored procedures, JPA/Hibernate
+          mappings, and high-throughput Apache Kafka pipelines processing 2.5M
+          daily transactions.
+        skills:
+          - oracle-sql
+          - sql
+          - jpa
+          - hibernate
+          - kafka
+          - performance
+          - data-pipelines
+        strength: 5
+      - id: nt-snowflake
+        text: Streamlined data operations by consolidating disparate historical storage
+          into Snowflake on Azure, optimizing storage costs while ensuring high
+          availability for cross-functional teams.
+        skills:
+          - snowflake
+          - azure
+          - data-engineering
+          - cost-optimization
+          - cloud
+        strength: 4
+      - id: nt-healthchecks
+        text: Built automated health-check tooling and validation scripts to detect and
+          remediate deployment regressions, improving operational stability for
+          supported solutions.
+        skills:
+          - automation
+          - testing
+          - observability
+          - reliability
+          - deployment
+        strength: 4
+      - id: nt-docs
+        text: Produced system specifications, process flowcharts, maintenance guides,
+          and troubleshooting documentation to support handoffs and long-term
+          maintainability.
+        skills:
+          - documentation
+          - technical-writing
+          - process
+        strength: 3
+      - id: nt-agile
+        text: Translated business needs into technical requirements and iterative
+          delivery plans while driving story creation, sprint refinement, and
+          Agile execution for international integrations.
+        skills:
+          - agile
+          - scrum
+          - requirements
+          - delivery
+          - stakeholder-collaboration
+        strength: 4
+      - id: nt-agile-ceremonies
+        text: Facilitated Agile ceremonies (Sprint Planning, Stand-ups, Retrospectives)
+          during PM absences, ensuring consistent velocity and backlog health
+          for high-priority initiatives.
+        skills:
+          - agile
+          - scrum
+          - facilitation
+          - project-management
+        strength: 3
+      - id: nt-user-interviews
+        text: Conducted interviews with internal and external users to define business
+          logic and API specifications, translating high-level business needs
+          into detailed technical roadmaps.
+        skills:
+          - user-research
+          - requirements
+          - api-design
+          - product
+        strength: 4
+      - id: nt-llm
+        text: Harnessed large language models (LLMs) to accelerate code exploration,
+          implementation, debugging, and test iteration while applying
+          engineering judgment to validate their output.
+        skills:
+          - llm
+          - ai
+          - productivity
+          - debugging
+          - testing
+        strength: 3
+      - id: nt-visualization
+        text: Directed the development of automated visualization tools and diagnostic
+          utilities, reducing system regressions and improving overall stability
+          and UX for global partners.
+        skills:
+          - visualization
+          - tooling
+          - diagnostics
+          - ux
+          - reliability
+        strength: 3
   - id: blubracket
     company: BluBracket (acquired by HashiCorp)
     position: Software Engineer Consultant
@@ -48,6 +186,51 @@ roles:
     summary: Built security tooling for automated vulnerability detection and
       remediation across source code, developer environments, and CI/CD
       pipelines.
+    achievements:
+      - id: bb-dashboard
+        text: Built a React/Redux security dashboard for automated vulnerability
+          detection and remediation across source code, developer environments,
+          and CI/CD pipelines.
+        skills:
+          - react
+          - redux
+          - security
+          - dashboard
+          - ci-cd
+          - vulnerability-management
+        strength: 5
+      - id: bb-risk-scoring
+        text: Resolved critical logic flaws in security risk-scoring algorithms,
+          improving data accuracy and reducing false-positive alerts for
+          enterprise clients.
+        skills:
+          - security
+          - algorithms
+          - debugging
+          - data-quality
+          - risk
+        strength: 5
+      - id: bb-testing
+        text: Implemented Jest and Cypress testing suites to improve feature reliability
+          and UI performance across staging and production environments.
+        skills:
+          - jest
+          - cypress
+          - testing
+          - qa
+          - performance
+        strength: 4
+      - id: bb-a11y
+        text: Ensured accessibility (a11y) compliance across the web application,
+          implementing keyboard navigation and ARIA attributes to support
+          screen-reader users and diverse accessibility needs.
+        skills:
+          - accessibility
+          - a11y
+          - react
+          - ux
+          - frontend
+        strength: 3
   - id: impact-networking
     company: Impact Networking, LLC
     position: BPA Developer
@@ -56,6 +239,29 @@ roles:
     endDate: 2021-12
     summary: Developed full-stack automation solutions to streamline enterprise
       business processes.
+    achievements:
+      - id: impact-automation
+        text: Orchestrated full-stack automation solutions using C#/.NET and SQL to
+          streamline enterprise workflows across OCR, HR, and fundraising
+          departments.
+        skills:
+          - csharp
+          - dotnet
+          - sql
+          - automation
+          - full-stack
+          - enterprise
+        strength: 4
+      - id: impact-nonprofit
+        text: Delivered automation solutions for a diverse client portfolio, including a
+          non-profit medical organization, ensuring compliance with specialized
+          workflow requirements.
+        skills:
+          - consulting
+          - client-delivery
+          - compliance
+          - automation
+        strength: 3
 projects:
   - id: meal-planner
     name: Meal Planner
@@ -172,5 +378,61 @@ education:
 local:
   root: ~/projects
   include: []
+  exclude:
+    - gists
 github:
   username: rwendell
+  exclude:
+    - dotfiles
+    - nvim-config
+    - nixos-config
+    - obsidian-vaults
+    - SF6-notes
+    - LoL-notes
+    - zmk-config-allium58
+    - StardewValleyMods
+    - tinted-theming-schemes
+    - GameNative
+    - dolphin
+    - PenguLoader-SystemTrayWindows
+    - rosegold
+transferable:
+  - evidence: bb-dashboard
+    terms:
+      - Dashboards
+      - Dashboard UI
+      - Data Visualization
+      - UI Development
+  - evidence: nt-visualization
+    terms:
+      - Data Visualization
+      - Information Visualization
+      - Visualization Tooling
+  - evidence: nt-fullstack
+    terms:
+      - UI Development
+      - Component-Based UI
+  - evidence: nt-user-interviews
+    terms:
+      - User Research
+      - Human-Centered Requirements
+  - evidence: bb-a11y
+    terms:
+      - Usability
+      - Accessible UI
+  - evidence: github:pengu-plugins
+    terms:
+      - Reusable UI Components
+      - Settings UI
+      - Plugin UI
+  - evidence: github:shadcn-add
+    terms:
+      - Component Tooling
+      - UI Component Installation
+constraints:
+  - Never change employers, job titles, employment dates, or education dates.
+  - Never invent metrics, technologies, certifications, or scope. Use numbers
+    only as they appear in the cited achievement.
+  - Do not claim people management, security clearance, or formal certifications.
+  - Do not include an achievement solely to fill space; omit it if it does not
+    support the target role.
