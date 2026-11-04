@@ -14,10 +14,10 @@
  * Requires the GitHub CLI (`gh`) to be installed and authenticated.
  */
 import { execFileSync, spawnSync } from 'node:child_process';
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parse as parseYaml } from 'yaml';
+import { loadCareer } from './lib/career.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = resolve(__dirname, '..');
@@ -28,10 +28,13 @@ function flag(name, fallback) {
   return index === -1 ? fallback : args[index + 1];
 }
 
-const careerPath = resolve(rootDir, 'data/career.yml');
-const career = existsSync(careerPath)
-  ? parseYaml(readFileSync(careerPath, 'utf8'))
-  : {};
+let career = {};
+try {
+  career = loadCareer(rootDir, { optional: true }).career;
+} catch (error) {
+  console.error(`github: ${error.message}`);
+  process.exit(1);
+}
 const githubConfig = career.github ?? {};
 
 const user = flag('--user', githubConfig.username || null);
@@ -149,7 +152,7 @@ for (const { repo, source } of allRepos) {
     excluded.has(repo.name.toLowerCase()) ||
     excluded.has(fullName.toLowerCase())
   ) {
-    reasons.push('excluded in data/career.yml');
+    reasons.push('excluded in data/career.yml or data/career.private.yml');
   }
 
   let readme = '';
@@ -225,7 +228,9 @@ console.log(
   `github: wrote ${synced.length} repos (${synced.filter((repo) => repo.included).length} eligible; ${orgRepos.length} from orgs) to ${outPath}`,
 );
 if (excluded.size > 0) {
-  console.log(`github: excluded ${excluded.size} repo(s) from data/career.yml`);
+  console.log(
+    `github: excluded ${excluded.size} repo(s) from data/career.yml or data/career.private.yml`,
+  );
 }
 
 if (!skipLocal) {

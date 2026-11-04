@@ -5,8 +5,8 @@
  * That keeps the agents, permissions, and JSONL parsing identical no matter
  * which account pays for the run:
  *
- *   auto        OpenCode default -> OpenCode Go -> OpenRouter
- *   opencode    OpenCode default model
+ *   auto        OpenCode free -> OpenCode Go -> OpenRouter
+ *   opencode    OpenCode free model
  *   go          OpenCode Go subscription (cheap coding model by default)
  *   openrouter  OpenRouter credit (cheap coding model by default)
  *
@@ -20,9 +20,14 @@ import {
   runOpencode,
 } from './opencode.mjs';
 
-export const DEFAULT_GO_MODEL = 'opencode-go/deepseek-v4.1-flash';
+// DeepSeek V4.1 Flash defaults to the high thinking effort. Pin #high
+// explicitly so a session-level #max selection cannot leak into scripted runs.
+// Use #low when speed matters more than the extra reasoning.
+export const DEFAULT_OPENCODE_MODEL =
+  'opencode/deepseek-v4.1-flash-free#high';
+export const DEFAULT_GO_MODEL = 'opencode-go/deepseek-v4.1-flash#high';
 export const DEFAULT_OPENROUTER_MODEL =
-  'openrouter/deepseek/deepseek-v4.1-flash-1017';
+  'openrouter/deepseek/deepseek-v4.1-flash-1017#high';
 
 const PROVIDER_LABELS = {
   opencode: 'OpenCode',
@@ -62,7 +67,10 @@ export function resolveProviderChain({ provider, model } = {}) {
     if (model) return [createTarget('opencode', model)];
 
     return [
-      createTarget('opencode', process.env.OPENCODE_MODEL || null),
+      createTarget(
+        'opencode',
+        process.env.OPENCODE_MODEL || DEFAULT_OPENCODE_MODEL,
+      ),
       createTarget(
         'go',
         process.env.OPENCODE_GO_MODEL
@@ -186,7 +194,9 @@ function normalizeProvider(value) {
 }
 
 function defaultModelForProvider(provider) {
-  if (provider === 'opencode') return process.env.OPENCODE_MODEL || null;
+  if (provider === 'opencode') {
+    return process.env.OPENCODE_MODEL || DEFAULT_OPENCODE_MODEL;
+  }
   if (provider === 'go') {
     return process.env.OPENCODE_GO_MODEL
       ? normalizeModelForProvider('go', process.env.OPENCODE_GO_MODEL)

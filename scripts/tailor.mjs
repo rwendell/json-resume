@@ -22,7 +22,8 @@ import {
 } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
+import { stringify as stringifyYaml } from 'yaml';
+import { loadCareer } from './lib/career.mjs';
 import {
   formatJobMarkdown,
   readJobInput,
@@ -67,14 +68,12 @@ if (options.help) {
   process.exit(0);
 }
 
-const careerPath = resolve(rootDir, 'data/career.yml');
-if (!existsSync(careerPath)) {
-  fail(
-    'Missing data/career.yml. Create a career fact bank before tailoring a resume.',
-  );
+let career;
+try {
+  career = loadCareer(rootDir).career;
+} catch (error) {
+  fail(error.message);
 }
-
-const career = parseYaml(readFileSync(careerPath, 'utf8'));
 
 let job;
 if (options.generic) {
@@ -778,7 +777,7 @@ async function ensureFilled({
     if (height < MIN_FILL_HEIGHT) {
       renderPdf(resumePath, pdfPath, theme);
       fail(
-        `PDF fits on one page but is too sparse (${Math.round(height)}px; minimum ${MIN_FILL_HEIGHT}px). Add more achievements to data/career.yml. Files are preserved in ${cacheDir}.`,
+        `PDF fits on one page but is too sparse (${Math.round(height)}px; minimum ${MIN_FILL_HEIGHT}px). Add more achievements to data/career.yml or data/career.private.yml. Files are preserved in ${cacheDir}.`,
       );
     }
 

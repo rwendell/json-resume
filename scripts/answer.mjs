@@ -19,7 +19,8 @@ import {
 } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
+import { stringify as stringifyYaml } from 'yaml';
+import { loadCareer } from './lib/career.mjs';
 import {
   formatJobMarkdown,
   readJobInput,
@@ -53,11 +54,12 @@ if (options.help) {
   process.exit(0);
 }
 
-const careerPath = resolve(rootDir, 'data/career.yml');
-if (!existsSync(careerPath)) {
-  fail('Missing data/career.yml. Create a career fact bank first.');
+let career;
+try {
+  career = loadCareer(rootDir).career;
+} catch (error) {
+  fail(error.message);
 }
-const career = parseYaml(readFileSync(careerPath, 'utf8'));
 
 const question = readTextInput(options.question);
 if (!question) {

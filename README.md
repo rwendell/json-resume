@@ -3,7 +3,9 @@
 This repo keeps your manually written resumes in `src/` and generates tailored
 resumes for specific jobs from:
 
-- `data/career.yml` — your verified career fact bank
+- `data/career.yml` — your public career fact bank
+- `data/career.private.yml` — optional gitignored private overlay for the full
+  fact bank
 - `data/github.json` and `data/local-projects.json` — your GitHub, org, and
   local projects
 - a job URL or job description file
@@ -54,7 +56,7 @@ running in a script or over SSH.
 The resume must fit on exactly one page and should fill it. If the first draft
 is longer, `tailor` trims lower-value content in small steps and re-renders. If
 the result is too sparse (more than roughly two lines short of the printable
-page), it adds unused achievements from `data/career.yml`. It fails rather than
+page), it adds unused achievements from the merged fact bank. It fails rather than
 leaving a multi-page or mostly-empty PDF.
 
 ### Check the result
@@ -74,17 +76,17 @@ aube run answer -q "Why do you want this role?"
 `tailor` and `answer` default to `--provider auto`, which tries providers in
 this order:
 
-1. the OpenCode default model, which may be free
-2. OpenCode Go, using `opencode-go/deepseek-v4.1-flash`
-3. OpenRouter, using `openrouter/deepseek/deepseek-v4.1-flash-1017`
+1. the free OpenCode model, using `opencode/deepseek-v4.1-flash-free#high`
+2. OpenCode Go, using `opencode-go/deepseek-v4.1-flash#high`
+3. OpenRouter, using `openrouter/deepseek/deepseek-v4.1-flash-1017#high`
 
 A provider is retried only when it exits non-zero, returns no JSON object, or
 returns JSON that does not match the expected shape. The command prints which
 provider produced the draft:
 
 ```text
-tailor: OpenCode (default model) failed: exited with status 1: ...; trying the next provider
-tailor: draft from OpenCode Go (opencode-go/deepseek-v4.1-flash)
+tailor: OpenCode (opencode/deepseek-v4.1-flash-free#high) failed: exited with status 1; trying the next provider
+tailor: draft from OpenCode Go (opencode-go/deepseek-v4.1-flash#high)
 ```
 
 Force a provider when you already know the free quota is gone:
@@ -99,7 +101,7 @@ Provider values:
 | Value | Meaning |
 | --- | --- |
 | `auto` | Try OpenCode, OpenCode Go, then OpenRouter (default) |
-| `opencode` | OpenCode default model only |
+| `opencode` | Free OpenCode model only |
 | `go` | OpenCode Go only |
 | `openrouter` | OpenRouter only |
 
@@ -107,9 +109,16 @@ Environment overrides:
 
 ```bash
 export RESUME_LLM_PROVIDER=go
-export OPENCODE_MODEL=opencode/deepseek-v4.1-flash-free
-export OPENCODE_GO_MODEL=opencode-go/glm-5.3-flash
-export OPENROUTER_MODEL=openrouter/deepseek/deepseek-v4.1-flash-1017
+export OPENCODE_MODEL=opencode/deepseek-v4.1-flash-free#high
+export OPENCODE_GO_MODEL=opencode-go/deepseek-v4.1-flash#high
+export OPENROUTER_MODEL=openrouter/deepseek/deepseek-v4.1-flash-1017#high
+```
+
+The defaults pin `#high`, DeepSeek's normal thinking effort. They never request
+`#max`. For a faster run, override the Go or OpenRouter model with `#low`:
+
+```bash
+export OPENCODE_GO_MODEL=opencode-go/deepseek-v4.1-flash#low
 ```
 
 The commands use the credentials already connected to OpenCode. If a provider
@@ -319,7 +328,7 @@ aube run verify-resume -- generated/resumes/resume-acme-data.pdf
 Verification checks:
 
 - JSON Resume schema validity
-- Employers, titles, and dates against `data/career.yml`
+- Employers, titles, and dates against the merged public/private fact bank
 - Numeric claims against their cited evidence
 - Trace coverage for every bullet and project
 - Projects were actual candidates for this job
@@ -413,19 +422,27 @@ script directly.
 
 ## Edit your career fact bank
 
-`data/career.yml` is the source of truth for generated resumes. Add roles,
-achievements, projects, and skills there.
+`data/career.yml` is the public source of truth for generated resumes. It is
+safe to commit: keep only facts you are comfortable publishing there.
 
-Each achievement needs a stable `id` so the verifier can prove the generated
-bullet is grounded:
+Put private achievements, constraints, and source configuration in
+`data/career.private.yml`. That file is gitignored and merged over the public
+file at runtime, so you do not repeat public role metadata:
 
 ```yaml
+# data/career.yml — public
 roles:
   - id: northern-trust
     company: Northern Trust
     position: Senior Associate - Software Engineer
     startDate: 2022-08
     endDate: 2026-02
+```
+
+```yaml
+# data/career.private.yml — private, gitignored
+roles:
+  - id: northern-trust
     achievements:
       - id: nt-kafka
         text: >-
@@ -434,6 +451,14 @@ roles:
           daily transactions.
         skills: [oracle-sql, sql, jpa, hibernate, kafka, performance]
 ```
+
+Arrays merge by `id` for roles, achievements, projects, and education; by
+`name` for skill groups; and by `evidence` for `transferable` entries. String
+arrays such as `constraints` and `exclude` are unioned. Scalar values in the
+private file override the public file.
+
+Each achievement needs a stable `id` so the verifier can prove the generated
+bullet is grounded.
 
 Rules that keep the output trustworthy:
 
@@ -501,7 +526,7 @@ github:<owner>/<repo>       organization repo
 local:<project>             local ~/projects project
 ```
 
-Exclude sources in `data/career.yml`:
+Exclude sources in `data/career.yml` or the private overlay:
 
 ```yaml
 github:
@@ -594,8 +619,11 @@ aube run render -- software-engineer jsonresume-theme-even
   the website and gist. Do not put tailored resumes in `src/`.
 - `data/github.json` and `data/local-projects.json` are gitignored because they
   can contain private organization READMEs and local project paths.
-- `data/career.yml` is more comprehensive than any published resume. Review it
-  before committing if the repository is public.
+- `data/career.yml` is **public**. Keep only facts that are safe to publish
+  there. Private achievements, constraints, and source configuration belong in
+  `data/career.private.yml`, which is gitignored and merged at runtime.
+- Removing private data from a tracked file does not remove it from existing
+  Git history. Rewrite history if private data was pushed.
 - Provider credentials live in OpenCode's auth store or your environment. Do not
   commit `.env`; it is gitignored.
 
@@ -637,13 +665,13 @@ aube exec --no-install -- puppeteer browsers install chrome
 **The PDF is still longer than one page.** `tailor` trims lower-value bullets,
 projects, and skill keywords automatically, then fails if it still cannot fit.
 If that happens, target a more focused job description or remove lower-value
-content from `data/career.yml`. The multi-page PDF and cache are preserved for
-inspection.
+content from the merged fact bank. The multi-page PDF and cache are preserved
+for inspection.
 
 **The PDF is too sparse.** `tailor` first tries unused achievements from
-`data/career.yml` to fill the page. If none fit, add more achievements to the
-fact bank (or a relevant project) and regenerate. It will not silently ship a
-mostly-empty page.
+the merged fact bank to fill the page. If none fit, add more achievements to
+`data/career.yml` or `data/career.private.yml` (or a relevant project) and
+regenerate. It will not silently ship a mostly-empty page.
 
 **The preview does not open.** `tailor` tries `open`, `xdg-open`, `kde-open`,
 and other common desktop openers. If none are available, open the printed file
@@ -652,7 +680,8 @@ path manually or pass `--no-open`.
 ## Project structure
 
 ```text
-data/career.yml               Canonical career fact bank
+data/career.yml               Public career fact bank
+data/career.private.yml       Private fact-bank overlay (gitignored)
 data/github.json              Synced GitHub/org metadata (gitignored)
 data/local-projects.json      Scanned ~/projects metadata (gitignored)
 generated/resumes/            Private tailored PDFs (gitignored)
@@ -669,6 +698,7 @@ scripts/answer.mjs            Job/question -> grounded application answer
 scripts/score-projects.mjs    Project scoring explainer
 scripts/verify-resume.mjs     Schema, trace, evidence, and one-page checks
 scripts/clean-cache.mjs       Remove intermediate resume cache
+scripts/lib/career.mjs        Public/private fact-bank merge
 scripts/lib/job-input.mjs     Job URL/file/frontmatter parsing
 scripts/lib/job-page.mjs      Job URL fetching and HTML extraction
 scripts/lib/github-projects.mjs Project candidate selection/scoring

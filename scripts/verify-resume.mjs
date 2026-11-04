@@ -13,8 +13,8 @@
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parse as parseYaml } from 'yaml';
 import jsonResumeSchema from '@jsonresume/schema';
+import { loadCareer } from './lib/career.mjs';
 import { extractNumbers } from './lib/numbers.mjs';
 import {
   findCacheByPdf,
@@ -176,7 +176,13 @@ if (!existsSync(tracePath)) {
 
 const resume = readJson(resumePath);
 const trace = readJson(tracePath);
-const career = parseYaml(readFileSync(resolve(rootDir, 'data/career.yml'), 'utf8'));
+let career;
+try {
+  ({ career } = loadCareer(rootDir));
+} catch (error) {
+  console.error(`verify: ${error.message}`);
+  process.exit(1);
+}
 const githubPath = resolve(rootDir, 'data/github.json');
 const github = existsSync(githubPath) ? readJson(githubPath) : { repos: [] };
 const candidates = existsSync(candidatesPath) ? readJson(candidatesPath) : null;

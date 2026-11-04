@@ -17,7 +17,7 @@ import {
 import { homedir } from 'node:os';
 import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parse as parseYaml } from 'yaml';
+import { loadCareer } from './lib/career.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = resolve(__dirname, '..');
@@ -28,10 +28,13 @@ function flag(name, fallback) {
   return index === -1 ? fallback : args[index + 1];
 }
 
-const careerPath = resolve(rootDir, 'data/career.yml');
-const career = existsSync(careerPath)
-  ? parseYaml(readFileSync(careerPath, 'utf8'))
-  : {};
+let career = {};
+try {
+  career = loadCareer(rootDir, { optional: true }).career;
+} catch (error) {
+  console.error(`local: ${error.message}`);
+  process.exit(1);
+}
 const localConfig = career.local ?? {};
 const githubConfig = career.github ?? {};
 const githubUser = githubConfig.username || '';
@@ -140,7 +143,7 @@ function inspectProject(name, fullPath) {
 
   const reasons = [];
   if (exclude.has(name.toLowerCase())) {
-    reasons.push('excluded in data/career.yml');
+    reasons.push('excluded in data/career.yml or data/career.private.yml');
   }
   if (!readme && !description && languages.length === 0) {
     reasons.push('no README or project manifest');

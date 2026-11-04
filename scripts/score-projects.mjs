@@ -7,10 +7,9 @@
  *   aube run score-projects -- job.md
  *   aube run score-projects -- --title "Go Platform Engineer" --description job.txt
  */
-import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parse as parseYaml } from 'yaml';
+import { loadCareer } from './lib/career.mjs';
 import { readJobInput } from './lib/job-input.mjs';
 import {
   loadGithub,
@@ -28,8 +27,13 @@ if (options.help) {
   process.exit(0);
 }
 
-const careerPath = resolve(rootDir, 'data/career.yml');
-const career = parseYaml(readFileSync(careerPath, 'utf8'));
+let career;
+try {
+  career = loadCareer(rootDir).career;
+} catch (error) {
+  console.error(`score-projects: ${error.message}`);
+  process.exit(1);
+}
 
 const job = await resolveJob(options);
 if (!job.body && !job.title) {
@@ -191,7 +195,7 @@ function printHelp() {
   aube run score-projects -- --title "<title>" --description <file|text>
 
 Options:
-  --generic              Score against data/career.yml generic criteria
+  --generic              Score against the merged fact bank's generic criteria
   --title <text>         Job title
   --company <text>       Company
   --description <value>  Job description text, file, or URL
