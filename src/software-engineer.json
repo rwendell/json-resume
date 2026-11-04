@@ -2,10 +2,11 @@
 	"$schema": "https://raw.githubusercontent.com/jsonresume/resume-schema/master/schema.json",
 	"basics": {
 		"name": "Ryan Wendell",
-		"label": "Senior Software Engineer",
+		"label": "Software Engineer",
 		"email": "ryanjwendell@gmail.com",
 		"phone": "(224) 723-4213",
-		"summary": "Software engineer with 5 years of experience building full-stack features, integrations, and data pipelines for enterprise platforms. Experienced translating business needs into reliable technical solutions and collaborating across teams; now pursuing client-facing engineering, implementation, and technical product roles.",
+		"url": "https://rwendell.github.io/",
+		"summary": "Full-stack software engineer building TypeScript and React features for enterprise platforms, backed by relational databases, Kafka pipelines, and well-designed APIs.",
 		"location": {
 			"city": "Chicago",
 			"region": "Illinois",
@@ -33,13 +34,10 @@
 			"endDate": "2026-02",
 			"summary": "Full-stack engineer on enterprise financial platforms, leading feature delivery and cross-functional collaboration across international teams.",
 			"highlights": [
-				"Led the end-to-end lifecycle of large-scale features for global partners, overseeing design, test driven development (JUnit, Jest), deployment, and ongoing support across cross-functional teams.",
-				"Established functional requirements by collaborating across departments on API specifications, stored procedure interfaces, business logic, and expected outcomes to ensure solutions aligned with organizational needs.",
-				"Streamlined data operations by consolidating disparate historical storage into Snowflake on Azure, optimizing storage costs while ensuring high availability for cross-functional teams.",
-				"Improved operational stability by conducting system analysis and engineering automated health-check tooling and validation scripts to proactively detect and remediate deployment regressions.",
-				"Optimized application performance through advanced Oracle SQL schema design, stored procedure development, JPA/Hibernate ORM for efficient entity mapping and query optimization, and high-throughput multi-threaded Apache Kafka pipelines processing 2.5M daily transactions.",
 				"Developed full-stack features using TypeScript, React, and Redux on the frontend and Spring Boot with Java 21 on the backend, integrating with internal enterprise systems.",
-				"Harnessed large language models (LLMs) to accelerate code exploration, implementation, debugging, and test iteration while applying engineering judgment to validate their output."
+				"Optimized Oracle SQL schemas, stored procedures, JPA/Hibernate mappings, and high-throughput Apache Kafka pipelines processing 2.5M daily transactions.",
+				"Led end-to-end delivery of production features and integrations, from requirements and API design through testing, deployment, monitoring, and support.",
+				"Built automated health-check tooling and validation scripts to detect and remediate deployment regressions, improving operational stability for supported solutions."
 			]
 		},
 		{
@@ -50,10 +48,8 @@
 			"endDate": "2022-06",
 			"summary": "Built security tooling for automated vulnerability detection and remediation across source code, developer environments, and CI/CD pipelines.",
 			"highlights": [
-				"Built a React/Redux security dashboard focused on automated vulnerability detection and remediation within source code, developer environments, and CI/CD pipelines.",
-				"Resolved critical logic flaws in security risk-scoring algorithms, ensuring data accuracy and reducing false-positive alerts for enterprise clients.",
-				"Implemented automated testing suites using Jest and Cypress, ensuring high feature reliability and UI performance across staging and production environments.",
-				"Ensured accessibility (a11y) compliance across the web application, implementing keyboard navigation and ARIA attributes to support screen-reader users and diverse accessibility needs."
+				"Built a React/Redux security dashboard for automated vulnerability detection and remediation across source code, developer environments, and CI/CD pipelines.",
+				"Resolved critical logic flaws in security risk-scoring algorithms, improving data accuracy and reducing false-positive alerts for enterprise clients."
 			]
 		},
 		{
@@ -71,16 +67,66 @@
 	"projects": [
 		{
 			"name": "Meal Planner",
-			"description": "Full-stack household meal-planning application",
+			"description": "Full-stack household meal-planning application that turns shared weekly decisions into an actionable grocery workflow.",
+			"url": "https://github.com/rwendell/meal-planner",
 			"highlights": [
-				"Built a multi-user SvelteKit/TypeScript/Convex app by harnessing large language models (LLMs) for implementation, debugging, and iteration"
+				"Delivered a multi-user SvelteKit, TypeScript, and Convex application with authentication, household onboarding, shared planning, real-time data, and edge-case handling",
+				"Defined and delivered a focused product experience spanning meal management, weekly planning, household collaboration, leftover tracking, and synchronized shopping lists"
 			],
 			"keywords": [
 				"TypeScript",
 				"SvelteKit",
 				"Convex",
-				"Tailwind CSS",
-				"Large language models (LLMs)"
+				"Full-stack",
+				"Authentication",
+				"Realtime"
+			]
+		},
+		{
+			"name": "to-bot",
+			"description": "Discord bot that automates tournament organizer workflows, including start.gg account verification and self-service tournament management.",
+			"url": "https://github.com/rwendell/to-bot",
+			"highlights": [
+				"Built a TypeScript Discord bot that verifies start.gg accounts and lets users view entered tournaments and self-DQ through direct messages",
+				"Persisted verification and tournament state in SQLite, running as a pure-DM bot with no guild server or privileged intents"
+			],
+			"keywords": [
+				"TypeScript",
+				"SQLite",
+				"Discord",
+				"Automation"
+			]
+		}
+	],
+	"skills": [
+		{
+			"name": "Languages & Frameworks",
+			"keywords": [
+				"TypeScript",
+				"JavaScript",
+				"React",
+				"Redux",
+				"Java"
+			]
+		},
+		{
+			"name": "Data & Databases",
+			"keywords": [
+				"Oracle SQL",
+				"Apache Kafka",
+				"Snowflake",
+				"Azure",
+				"JPA/Hibernate"
+			]
+		},
+		{
+			"name": "Delivery & Collaboration",
+			"keywords": [
+				"API Design",
+				"Testing",
+				"Agile/Scrum",
+				"Cross-functional Collaboration",
+				"Requirements Gathering"
 			]
 		}
 	],
@@ -94,9 +140,6 @@
 		}
 	],
 	"meta": {
-		"canonical": "https://gist.github.com/e597887d6598c25d2b880c079c6937fe",
-		"theme": "jsonresume-theme-straightforward",
-		"version": "v1.0.0",
-		"lastModified": "2026-05-06T00:00:00"
+		"theme": "jsonresume-theme-straightforward"
 	}
 }

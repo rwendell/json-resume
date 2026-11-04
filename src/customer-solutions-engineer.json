@@ -1,0 +1,114 @@
+{
+	"$schema": "https://raw.githubusercontent.com/jsonresume/resume-schema/master/schema.json",
+	"basics": {
+		"name": "Ryan Wendell",
+		"label": "Customer Solutions Engineer",
+		"email": "ryanjwendell@gmail.com",
+		"phone": "(224) 723-4213",
+		"summary": "Customer-focused software engineer with 5 years of experience designing enterprise integrations, automating business processes, and delivering production solutions across technical and non-technical teams. Strong in API integration, data transformation, SQL, TypeScript, Java, troubleshooting, documentation, and translating operational requirements into reliable workflows.",
+		"location": {
+			"city": "Chicago",
+			"region": "Illinois",
+			"countryCode": "US"
+		},
+		"profiles": [
+			{
+				"network": "LinkedIn",
+				"username": "rjwendell",
+				"url": "https://www.linkedin.com/in/rjwendell/"
+			},
+			{
+				"network": "GitHub",
+				"username": "rwendell",
+				"url": "https://github.com/rwendell"
+			}
+		]
+	},
+	"work": [
+		{
+			"name": "Northern Trust",
+			"position": "Senior Associate - Software Engineer",
+			"url": "https://www.linkedin.com/company/3831/",
+			"startDate": "2022-08",
+			"endDate": "2026-02",
+			"summary": "Delivered enterprise integrations and workflow solutions for financial platforms while partnering with international teams and business stakeholders.",
+			"highlights": [
+				"Led end-to-end delivery of production features and integrations, from requirements and API design through testing, deployment, monitoring, and support.",
+				"Defined API specifications, stored procedure interfaces, business logic, validation rules, and expected outcomes by collaborating across technical and business departments.",
+				"Built TypeScript and React features backed by Spring Boot, Java, Oracle SQL, JPA/Hibernate, and Apache Kafka pipelines processing 2.5M daily transactions.",
+				"Engineered automated health checks and validation scripts to detect deployment regressions, improve troubleshooting, and increase operational reliability.",
+				"Produced system specifications, process flowcharts, maintenance guides, and troubleshooting documentation to support handoffs and long-term maintainability.",
+				"Harnessed large language models (LLMs) to accelerate code exploration, implementation, debugging, and test iteration while validating their output."
+			]
+		},
+		{
+			"name": "BluBracket (acquired by HashiCorp)",
+			"position": "Software Engineer Consultant",
+			"url": "https://www.linkedin.com/company/36107929/",
+			"startDate": "2021-12",
+			"endDate": "2022-06",
+			"summary": "Built and supported security tooling integrated with source code, developer environments, and CI/CD pipelines.",
+			"highlights": [
+				"Built a React/Redux dashboard for automated vulnerability detection and remediation across development and CI/CD workflows.",
+				"Resolved risk-scoring logic flaws and implemented Jest and Cypress testing to improve reliability and reduce false-positive alerts."
+			]
+		},
+		{
+			"name": "Impact Networking, LLC",
+			"position": "BPA Developer",
+			"url": "https://www.linkedin.com/company/44730/",
+			"startDate": "2021-03",
+			"endDate": "2021-12",
+			"summary": "Delivered tailored automation solutions for enterprise business processes.",
+			"highlights": [
+				"Orchestrated C#/.NET and SQL automation solutions for OCR, HR, and fundraising workflows by identifying manual bottlenecks and translating requirements into implementations."
+			]
+		}
+	],
+	"projects": [
+		{
+			"name": "Meal Planner",
+			"description": "Full-stack collaborative application for planning household meals and generating shared shopping lists",
+			"highlights": [
+				"Delivered a multi-user SvelteKit, TypeScript, and Convex application with authentication, household onboarding, shared planning, real-time data, and edge-case handling",
+				"Harnessed large language models (LLMs) for implementation and debugging while validating outputs through testing, review, and product feedback"
+			],
+			"keywords": [
+				"TypeScript",
+				"SvelteKit",
+				"REST APIs",
+				"SQL",
+				"LLM-assisted development"
+			]
+		}
+	],
+	"skills": [
+		{
+			"name": "Integrations & Automation",
+			"keywords": ["REST APIs", "Webhooks", "JSON", "OAuth", "Data Transformation", "Apache Kafka"]
+		},
+		{
+			"name": "Development & Data",
+			"keywords": ["TypeScript", "JavaScript", "Java", "Spring Boot", "C#/.NET", "SQL", "Git"]
+		},
+		{
+			"name": "Client Delivery",
+			"keywords": ["Requirements Gathering", "Stakeholder Collaboration", "Documentation", "Testing", "Agile/Scrum"]
+		}
+	],
+	"education": [
+		{
+			"institution": "Iowa State University",
+			"area": "Computer Science",
+			"studyType": "BS",
+			"startDate": "2016-08",
+			"endDate": "2020-12"
+		}
+	],
+	"meta": {
+		"canonical": "https://gist.github.com/e597887d6598c25d2b880c079c6937fe",
+		"theme": "jsonresume-theme-straightforward",
+		"version": "v1.0.0",
+		"lastModified": "2026-10-21T00:00:00"
+	}
+}

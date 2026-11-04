@@ -25,7 +25,7 @@ import { watch } from 'fs';
 watch(src, (eventType) => {
   if (eventType === 'change') {
     console.log('\nRebuilding...');
-    exec(`npx resumed render "${src}" -o "${outFile}"`, { cwd: rootDir, shell: true }, (err, stdout, stderr) => {
+    exec(`aube exec --no-install -- resumed render "${src}" -o "${outFile}"`, { cwd: rootDir, shell: true }, (err, stdout, stderr) => {
       if (err) console.error(stderr?.trim());
       else if (stdout) console.log(stdout.trim());
     });

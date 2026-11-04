@@ -7,10 +7,18 @@
 		"render": "node scripts/build.mjs render",
 		"pdf": "node scripts/build.mjs pdf",
 		"build": "node scripts/build.mjs build-all",
+		"index": "node scripts/build.mjs index",
 		"render-all": "node scripts/build.mjs render-all",
 		"pdf-all": "node scripts/build.mjs pdf-all",
 		"validate": "node scripts/validate.mjs",
-		"watch": "node scripts/watch.mjs"
+		"watch": "node scripts/watch.mjs",
+		"tailor": "node scripts/tailor.mjs",
+		"answer": "node scripts/answer.mjs",
+		"score-projects": "node scripts/score-projects.mjs",
+		"sync-github": "node scripts/sync-github.mjs",
+		"sync-local": "node scripts/sync-local-projects.mjs",
+		"verify-resume": "node scripts/verify-resume.mjs",
+		"clean-cache": "node scripts/clean-cache.mjs"
 	},
 	"devDependencies": {
 		"jsonresume-theme-straightforward": "^0.5.0",
@@ -23,5 +31,17 @@
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/rwendell/json-resume"
+	},
+	"dependencies": {
+		"@jsonresume/schema": "^1.7.0",
+		"cheerio": "^1.2.0",
+		"html-to-text": "^10.0.1",
+		"pdf-lib": "^1.17.1",
+		"yaml": "^2.9.1"
+	},
+	"aube": {
+		"allowBuilds": {
+			"puppeteer": true
+		}
 	}
 }

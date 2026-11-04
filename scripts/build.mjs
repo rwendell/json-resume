@@ -11,7 +11,7 @@ const file = process.argv[3];
 const theme = process.argv[4];
 
 if (!command) {
-  console.error('Usage: node scripts/build.mjs <render|pdf|render-all|pdf-all|build-all> [resume] [theme]');
+  console.error('Usage: node scripts/build.mjs <render|pdf|render-all|pdf-all|build-all|index> [resume] [theme]');
   console.error('  e.g.: node scripts/build.mjs pdf barista');
   console.error('  e.g.: node scripts/build.mjs render barista jsonresume-theme-even');
   console.error('  e.g.: node scripts/build.mjs build-all');
@@ -24,19 +24,30 @@ function resolveFile(file) {
   return `src/${name}`;
 }
 
+function resolveTheme(src, requested) {
+  if (requested) return requested;
+  try {
+    const data = JSON.parse(readFileSync(src, 'utf8'));
+    if (data.meta?.theme) return data.meta.theme;
+  } catch {
+    // Fall back to the repository default below.
+  }
+  return 'jsonresume-theme-straightforward';
+}
+
 function buildOne(cmd, file, theme) {
   const base = basename(file, '.json');
   const src = resolve(rootDir, file);
   const outDir = resolve(rootDir, 'dist', base);
   const ext = cmd === 'pdf' ? 'pdf' : 'html';
   const out = resolve(outDir, `${base}.${ext}`);
-  const themeFlag = theme ? `-t ${theme}` : '';
+  const themeFlag = `-t ${resolveTheme(src, theme)}`;
 
   mkdirSync(outDir, { recursive: true });
 
   const shell = cmd === 'pdf'
-    ? `npx resumed export "${src}" -o "${out}" ${themeFlag} --puppeteer-arg=--no-sandbox`
-    : `npx resumed render "${src}" -o "${out}" ${themeFlag}`;
+    ? `aube exec --no-install -- resumed export "${src}" -o "${out}" ${themeFlag} --puppeteer-arg=--no-sandbox`
+    : `aube exec --no-install -- resumed render "${src}" -o "${out}" ${themeFlag}`;
 
   console.log(`${cmd}: ${file} -> dist/${base}/${base}.${ext}`);
   execSync(shell, { cwd: rootDir, stdio: 'inherit' });
@@ -50,6 +61,7 @@ function getAllResumes() {
 }
 
 function generateIndex(resumes) {
+  mkdirSync(resolve(rootDir, 'dist'), { recursive: true });
   const metadata = resumes.map(file => {
     const data = JSON.parse(readFileSync(resolve(rootDir, file), 'utf8'));
     const id = basename(file, '.json');
@@ -111,7 +123,9 @@ function generateIndex(resumes) {
   console.log(`index: generated for ${metadata.length} resume(s)`);
 }
 
-if (command.endsWith('-all')) {
+if (command === 'index') {
+  generateIndex(getAllResumes());
+} else if (command.endsWith('-all')) {
   const cmd = command.replace('-all', '') || 'render';
   const resumes = getAllResumes();
   for (const r of resumes) {

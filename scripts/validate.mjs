@@ -32,10 +32,10 @@ if (resolved === 'all') {
   for (const r of resumes) {
     const src = resolve(rootDir, r);
     console.log(`validating: ${r}`);
-    execSync(`npx resumed validate "${src}"`, { cwd: rootDir, stdio: 'inherit' });
+    execSync(`aube exec --no-install -- resumed validate "${src}"`, { cwd: rootDir, stdio: 'inherit' });
   }
 } else {
   const src = resolve(rootDir, resolved);
   console.log(`validating: ${resolved}`);
-  execSync(`npx resumed validate "${src}"`, { cwd: rootDir, stdio: 'inherit' });
+  execSync(`aube exec --no-install -- resumed validate "${src}"`, { cwd: rootDir, stdio: 'inherit' });
 }

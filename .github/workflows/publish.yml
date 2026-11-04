@@ -14,18 +14,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - uses: jdx/aube-action@v1
         with:
-          node-version: 20
-          cache: npm
+          node-version: "20"
+          run-install: true
 
-      - run: npm ci
+      - name: Ensure Chromium is available for PDF export
+        run: aube exec --no-install -- puppeteer browsers install chrome
 
       - name: Validate resume data
-        run: npm run validate all
+        run: aube run validate -- all
 
       - name: Build all resumes
-        run: npm run build
+        run: aube run build
 
       - name: Mirror resume JSON files to gist
         env:
