@@ -5,14 +5,14 @@
  * That keeps the agents, permissions, and JSONL parsing identical no matter
  * which account pays for the run:
  *
- *   auto        OpenCode free -> OpenCode Go -> OpenRouter
+ *   auto        OpenRouter DeepSeek -> OpenRouter Haiku -> OpenCode Go -> OpenCode free
  *   opencode    OpenCode free model
  *   go          OpenCode Go subscription (cheap coding model by default)
- *   openrouter  OpenRouter credit (cheap coding model by default)
+ *   openrouter  OpenRouter DeepSeek -> Haiku fallback
  *
  * A failed provider is retried only when it exits non-zero, returns no JSON
- * object, or returns JSON that does not match the caller's contract. This also
- * covers the "free usage exhausted" response from the default model.
+ * object, returns JSON that does not match the caller's contract, or exceeds
+ * the target timeout.
  */
 import {
   parseOpencodeOutput,
@@ -20,14 +20,17 @@ import {
   runOpencode,
 } from './opencode.mjs';
 
-// DeepSeek V4.1 Flash defaults to the high thinking effort. Pin #high
-// explicitly so a session-level #max selection cannot leak into scripted runs.
-// Use #low when speed matters more than the extra reasoning.
+// DeepSeek is the primary tailoring model; Haiku is the faster fallback when
+// DeepSeek stalls. The primary attempt is capped at two minutes so a single
+// pathological reasoning run cannot hold the whole command hostage.
 export const DEFAULT_OPENCODE_MODEL =
   'opencode/deepseek-v4.1-flash-free#high';
 export const DEFAULT_GO_MODEL = 'opencode-go/deepseek-v4.1-flash#high';
 export const DEFAULT_OPENROUTER_MODEL =
   'openrouter/deepseek/deepseek-v4.1-flash-1017#high';
+export const DEFAULT_OPENROUTER_FALLBACK_MODEL =
+  'openrouter/anthropic/claude-haiku-5.5#low';
+export const DEFAULT_OPENROUTER_TIMEOUT_MS = 120_000;
 
 const PROVIDER_LABELS = {
   opencode: 'OpenCode',
@@ -67,10 +70,7 @@ export function resolveProviderChain({ provider, model } = {}) {
     if (model) return [createTarget('opencode', model)];
 
     return [
-      createTarget(
-        'opencode',
-        process.env.OPENCODE_MODEL || DEFAULT_OPENCODE_MODEL,
-      ),
+      ...openRouterChain(),
       createTarget(
         'go',
         process.env.OPENCODE_GO_MODEL
@@ -78,21 +78,38 @@ export function resolveProviderChain({ provider, model } = {}) {
           : DEFAULT_GO_MODEL,
       ),
       createTarget(
-        'openrouter',
-        process.env.OPENROUTER_MODEL
-          ? normalizeModelForProvider(
-              'openrouter',
-              process.env.OPENROUTER_MODEL,
-            )
-          : DEFAULT_OPENROUTER_MODEL,
+        'opencode',
+        process.env.OPENCODE_MODEL || DEFAULT_OPENCODE_MODEL,
       ),
     ];
+  }
+
+  if (requested === 'openrouter' && !model) {
+    return openRouterChain();
   }
 
   const targetModel = model
     ? normalizeModelForProvider(requested, model)
     : defaultModelForProvider(requested);
   return [createTarget(requested, targetModel)];
+}
+
+function openRouterChain() {
+  const primaryModel = process.env.OPENROUTER_MODEL
+    ? normalizeModelForProvider('openrouter', process.env.OPENROUTER_MODEL)
+    : DEFAULT_OPENROUTER_MODEL;
+  const fallbackModel = process.env.OPENROUTER_FALLBACK_MODEL
+    ? normalizeModelForProvider(
+        'openrouter',
+        process.env.OPENROUTER_FALLBACK_MODEL,
+      )
+    : DEFAULT_OPENROUTER_FALLBACK_MODEL;
+
+  const primary = createTarget('openrouter', primaryModel, {
+    timeout: DEFAULT_OPENROUTER_TIMEOUT_MS,
+  });
+  const fallback = createTarget('openrouter', fallbackModel);
+  return primary.model === fallback.model ? [primary] : [primary, fallback];
 }
 
 export function runAgent({
@@ -111,6 +128,7 @@ export function runAgent({
   let lastRaw = '';
 
   for (const [index, target] of chain.entries()) {
+    const targetTimeout = target.timeout ?? timeout;
     const label = target.model
       ? `${target.label} (${target.model})`
       : `${target.label} (default model)`;
@@ -119,6 +137,7 @@ export function runAgent({
       total: chain.length,
       target,
       label,
+      timeout: targetTimeout,
     };
 
     onAttempt?.({ ...context, phase: 'start' });
@@ -128,7 +147,7 @@ export function runAgent({
       agent,
       model: target.model,
       title,
-      timeout,
+      timeout: targetTimeout,
       cwd,
     });
     const raw = result.stdout || '';
@@ -136,7 +155,12 @@ export function runAgent({
     const stderr = result.stderr || '';
 
     if (result.error) {
-      const reason = truncate(result.error.message, 1200);
+      const timedOut =
+        result.error.code === 'ETIMEDOUT' ||
+        /timed out|ETIMEDOUT/i.test(result.error.message ?? '');
+      const reason = timedOut
+        ? `timed out after ${Math.round(targetTimeout / 1000)}s`
+        : truncate(result.error.message, 1200);
       attempts.push({ ...context, reason, status: result.status, stderr });
       onAttempt?.({ ...context, phase: 'failed', reason });
       continue;
@@ -218,7 +242,7 @@ function normalizeModelForProvider(provider, model) {
   return value;
 }
 
-function createTarget(name, model) {
+function createTarget(name, model, { timeout } = {}) {
   const inferred = model?.startsWith('opencode-go/')
     ? 'go'
     : model?.startsWith('openrouter/')
@@ -228,6 +252,7 @@ function createTarget(name, model) {
     name,
     label: PROVIDER_LABELS[inferred],
     model: model || null,
+    timeout,
   };
 }
 

@@ -1,11 +1,12 @@
 # Public career facts: roles, achievements, projects, skills, and
-# configuration. Keep PII (name, contact details, location) out of this file.
+# configuration. Keep PII (name, email, phone, location) out of this file.
 # PII lives in data/career.private.yml, which is gitignored and merged at
 # runtime.
 
 version: 1
 basics:
-  url: https://rwendell.github.io/
+  # Add `url: https://...` when the site is a portfolio. Leave it out to keep a
+  # resume-only website off generated resumes.
   profiles:
     - network: LinkedIn
       username: rjwendell
@@ -368,6 +369,38 @@ skillGroups:
       - Android
       - USB
       - Secure Boot
+
+# True but too-vague tags. They remain valid evidence tags on achievements and
+# projects, but generated resumes omit them from the skills section.
+skillExclude:
+  - testing
+  - software testing
+  - development
+  - software development
+  - deployment
+  - monitoring
+  - support
+  - delivery
+  - client delivery
+  - automation
+  - requirements
+  - requirements gathering
+  - documentation
+  - collaboration
+  - cross-functional collaboration
+  - stakeholder collaboration
+  - troubleshooting
+  - debugging
+  - full-stack
+  - frontend
+  - integrations
+  - cloud
+  - reliability
+  - data transformation
+  - process
+  - qa
+  - tooling
+
 education:
   - id: iowa-state
     institution: Iowa State University
@@ -380,6 +413,7 @@ local:
   include: []
   exclude:
     - gists
+    - rwendell.github.io # resume-only site; remove when it becomes a portfolio
 github:
   username: rwendell
   exclude:
@@ -392,6 +426,7 @@ github:
     - zmk-config-allium58
     - StardewValleyMods
     - tinted-theming-schemes
+    - rwendell.github.io # resume-only site; remove when it becomes a portfolio
     - GameNative
     - dolphin
     - PenguLoader-SystemTrayWindows

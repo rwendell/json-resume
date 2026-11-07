@@ -944,7 +944,7 @@ Options:
   --description <value>   Job description text, file, or URL
   --provider <name>       Model provider: auto, opencode, go, openrouter (default: auto)
   --model <model>         Use one exact model and skip provider fallback
-  --timeout <seconds>     Per-provider timeout (default: 600)
+  --timeout <seconds>     Per-provider timeout (default: 600; OpenRouter primary capped at 120)
   --refresh               Force a GitHub/org + local project refresh
   --no-sync               Skip the 24-hour GitHub metadata refresh
   --no-copy               Do not copy the answer to the clipboard

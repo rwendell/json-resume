@@ -37,7 +37,13 @@ import {
 } from './lib/github-projects.mjs';
 import { LlmError, runAgent } from './lib/llm.mjs';
 import { openFile } from './lib/open-file.mjs';
-import { normalizeThemePunctuation } from './lib/resume-format.mjs';
+import { applyBasicsUrlPolicy } from './lib/resume-basics.mjs';
+import { filterExcludedSkills } from './lib/resume-skills.mjs';
+import { hasTraceCoverage } from './lib/resume-trace.mjs';
+import {
+  normalizeNumberSpacing,
+  normalizeThemePunctuation,
+} from './lib/resume-format.mjs';
 import {
   choosePdfPath,
   readCacheMeta,
@@ -224,7 +230,8 @@ try {
       typeof value.resume === 'object' &&
       value.resume !== null &&
       typeof value.trace === 'object' &&
-      value.trace !== null,
+      value.trace !== null &&
+      hasTraceCoverage(value.resume, value.trace),
     onAttempt: ({ phase, label, reason, index, total }) => {
       if (phase !== 'failed') return;
       const next = index + 1 < total ? '; trying the next provider' : '';
@@ -269,9 +276,23 @@ if (!output.resume.$schema) {
     'https://raw.githubusercontent.com/jsonresume/resume-schema/master/schema.json';
 }
 
+if (normalizeNumberSpacing(output.resume)) {
+  console.log('tailor: normalized decimal spacing in generated text');
+}
+
 if (normalizeThemePunctuation(output.resume)) {
   console.log(
     'tailor: removed terminal punctuation from project highlights/skills for this theme',
+  );
+}
+
+const basicsChange = applyBasicsUrlPolicy(output.resume, career);
+if (basicsChange) console.log(`tailor: ${basicsChange}`);
+
+const removedSkills = filterExcludedSkills(output.resume, career);
+if (removedSkills.length > 0) {
+  console.log(
+    `tailor: removed vague skills from the skills section: ${removedSkills.join(', ')}`,
   );
 }
 
@@ -305,7 +326,6 @@ console.log(
 );
 
 if (options.render) {
-  renderPdf(resumePath, pdfPath, options.theme);
   await ensureOnePage({
     resume: output.resume,
     trace: output.trace,
@@ -660,56 +680,95 @@ async function ensureOnePage({
   theme,
   career,
 }) {
-  let pages;
+  const htmlPath = join(cacheDir, 'measure.html');
+  let measurer;
   try {
-    pages = await getPdfPageCount(pdfPath);
+    measurer = await createPageMeasurer();
   } catch (error) {
-    fail(`Could not read the PDF page count: ${error.message}`);
+    fail(`Could not start page measurement: ${error.message}`);
   }
 
-  const finish = async () => {
-    await ensureFilled({
-      resume,
-      trace,
-      resumePath,
-      tracePath,
-      pdfPath,
-      theme,
-      career,
-    });
-  };
-
-  if (pages === 1) {
-    console.log('tailor: PDF is 1 page');
-    await finish();
-    return;
-  }
-
-  for (let level = 0; level < TRIM_PLANS.length; level += 1) {
-    if (!trimResume(resume, trace, level)) continue;
-
-    writeFileSync(resumePath, `${JSON.stringify(resume, null, '\t')}\n`);
-    writeFileSync(tracePath, `${JSON.stringify(trace, null, '\t')}\n`);
+  try {
+    renderHtml(resumePath, htmlPath, theme);
+    let height = await measurer.measure(htmlPath);
     console.log(
-      `tailor: PDF is ${pages} pages; trimming to fit one page (attempt ${level + 1})`,
+      `tailor: draft fill ${Math.round(height)}px (page ${PAGE_CONTENT_HEIGHT}px)`,
     );
-    renderPdf(resumePath, pdfPath, theme);
 
-    try {
-      pages = await getPdfPageCount(pdfPath);
-    } catch (error) {
-      fail(`Could not read the PDF page count: ${error.message}`);
+    let pages = null;
+    if (height <= PAGE_CONTENT_HEIGHT) {
+      renderPdf(resumePath, pdfPath, theme);
+      pages = await readPageCount(pdfPath);
+      if (pages === 1) {
+        console.log('tailor: PDF is 1 page');
+        await ensureFilled({
+          resume,
+          trace,
+          resumePath,
+          tracePath,
+          pdfPath,
+          theme,
+          career,
+          measurer,
+          htmlPath,
+          initialHeight: height,
+        });
+        return;
+      }
+      console.log(
+        `tailor: HTML fits but PDF is ${pages} pages; continuing to trim`,
+      );
+    } else {
+      console.log(
+        `tailor: draft is over one page (${Math.round(height)}px); trimming`,
+      );
     }
-    if (pages === 1) {
-      console.log('tailor: PDF now fits on one page');
-      await finish();
-      return;
+
+    for (let level = 0; level < TRIM_PLANS.length; level += 1) {
+      if (!trimResume(resume, trace, level)) continue;
+
+      writeResumeFiles(resume, trace, resumePath, tracePath);
+      renderHtml(resumePath, htmlPath, theme);
+      height = await measurer.measure(htmlPath);
+      if (height > PAGE_CONTENT_HEIGHT) {
+        console.log(
+          `tailor: trim attempt ${level + 1}: ${Math.round(height)}px; still too tall`,
+        );
+        continue;
+      }
+
+      renderPdf(resumePath, pdfPath, theme);
+      pages = await readPageCount(pdfPath);
+      if (pages === 1) {
+        console.log('tailor: PDF now fits on one page');
+        await ensureFilled({
+          resume,
+          trace,
+          resumePath,
+          tracePath,
+          pdfPath,
+          theme,
+          career,
+          measurer,
+          htmlPath,
+          initialHeight: height,
+        });
+        return;
+      }
+      console.log(
+        `tailor: trim attempt ${level + 1}: HTML fits but PDF is ${pages} pages`,
+      );
     }
+
+    fail(
+      pages == null
+        ? `Resume is still too tall after trimming. Files are preserved in ${cacheDir}.`
+        : `PDF is still ${pages} pages after trimming. Tailored resumes must be exactly one page. Files are preserved in ${cacheDir}.`,
+    );
+  } finally {
+    if (measurer) await measurer.close();
+    rmSync(htmlPath, { force: true });
   }
-
-  fail(
-    `PDF is still ${pages} pages after trimming. Tailored resumes must be exactly one page. Files are preserved in ${cacheDir}.`,
-  );
 }
 
 async function ensureFilled({
@@ -720,18 +779,12 @@ async function ensureFilled({
   pdfPath,
   theme,
   career,
+  measurer,
+  htmlPath,
+  initialHeight,
 }) {
-  const htmlPath = join(cacheDir, 'fill.html');
-  let measurer;
   try {
-    measurer = await createPageMeasurer();
-  } catch (error) {
-    fail(`Could not start page-fill measurement: ${error.message}`);
-  }
-
-  try {
-    renderHtml(resumePath, htmlPath, theme);
-    let height = await measurer.measure(htmlPath);
+    let height = initialHeight;
     console.log(
       `tailor: content fill ${Math.round(height)}px (minimum ${MIN_FILL_HEIGHT}px, page ${PAGE_CONTENT_HEIGHT}px)`,
     );
@@ -746,24 +799,13 @@ async function ensureFilled({
       const insertion = appendAchievement(resume, trace, candidate);
       if (!insertion) continue;
 
-      writeFileSync(resumePath, `${JSON.stringify(resume, null, '\t')}\n`);
-      writeFileSync(tracePath, `${JSON.stringify(trace, null, '\t')}\n`);
+      writeResumeFiles(resume, trace, resumePath, tracePath);
       renderHtml(resumePath, htmlPath, theme);
       const next = await measurer.measure(htmlPath);
 
       if (next > PAGE_CONTENT_HEIGHT) {
         removeLastHighlight(resume, trace, insertion.index);
-        writeFileSync(resumePath, `${JSON.stringify(resume, null, '\t')}\n`);
-        writeFileSync(tracePath, `${JSON.stringify(trace, null, '\t')}\n`);
-        continue;
-      }
-
-      renderPdf(resumePath, pdfPath, theme);
-      const pages = await getPdfPageCount(pdfPath);
-      if (pages !== 1) {
-        removeLastHighlight(resume, trace, insertion.index);
-        writeFileSync(resumePath, `${JSON.stringify(resume, null, '\t')}\n`);
-        writeFileSync(tracePath, `${JSON.stringify(trace, null, '\t')}\n`);
+        writeResumeFiles(resume, trace, resumePath, tracePath);
         continue;
       }
 
@@ -782,7 +824,7 @@ async function ensureFilled({
     }
 
     renderPdf(resumePath, pdfPath, theme);
-    const pages = await getPdfPageCount(pdfPath);
+    const pages = await readPageCount(pdfPath);
     if (pages !== 1) {
       fail(
         `PDF is ${pages} pages after filling. Files are preserved in ${cacheDir}.`,
@@ -790,10 +832,20 @@ async function ensureFilled({
     }
   } catch (error) {
     fail(`Could not measure page fill: ${error.message}`);
-  } finally {
-    if (measurer) await measurer.close();
-    rmSync(htmlPath, { force: true });
   }
+}
+
+async function readPageCount(pdfPath) {
+  try {
+    return await getPdfPageCount(pdfPath);
+  } catch (error) {
+    fail(`Could not read the PDF page count: ${error.message}`);
+  }
+}
+
+function writeResumeFiles(resume, trace, resumePath, tracePath) {
+  writeFileSync(resumePath, `${JSON.stringify(resume, null, '\t')}\n`);
+  writeFileSync(tracePath, `${JSON.stringify(trace, null, '\t')}\n`);
 }
 
 function renderHtml(resumePath, htmlPath, theme) {
@@ -814,7 +866,7 @@ function renderHtml(resumePath, htmlPath, theme) {
     { cwd: rootDir, stdio: 'ignore' },
   );
   if (result.status !== 0 || !existsSync(htmlPath)) {
-    fail('Could not render HTML for page-fill measurement.');
+    fail('Could not render HTML for page measurement.');
   }
 }
 
@@ -833,7 +885,7 @@ Options:
   --provider <name>      Model provider: auto, opencode, go, openrouter (default: auto)
   --model <model>        Use one exact model and skip provider fallback
   --theme <package>      JSON Resume theme (default: jsonresume-theme-straightforward)
-  --timeout <seconds>    Per-provider timeout (default: 600)
+  --timeout <seconds>    Per-provider timeout (default: 600; OpenRouter primary capped at 120)
   --no-render            Skip PDF rendering (keeps cache JSON)
   --no-open              Do not open the rendered PDF preview
   --clean-cache          Delete intermediate JSON after a successful run

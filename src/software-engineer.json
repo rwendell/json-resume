@@ -5,7 +5,6 @@
 		"label": "Software Engineer",
 		"email": "ryanjwendell@gmail.com",
 		"phone": "(224) 723-4213",
-		"url": "https://rwendell.github.io/",
 		"summary": "Full-stack software engineer building TypeScript and React features for enterprise platforms, backed by relational databases, Kafka pipelines, and well-designed APIs.",
 		"location": {
 			"city": "Chicago",
@@ -123,10 +122,7 @@
 			"name": "Delivery & Collaboration",
 			"keywords": [
 				"API Design",
-				"Testing",
-				"Agile/Scrum",
-				"Cross-functional Collaboration",
-				"Requirements Gathering"
+				"Agile/Scrum"
 			]
 		}
 	],

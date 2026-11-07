@@ -43,6 +43,12 @@ These rules override every stylistic consideration:
   certifications unless they appear explicitly in the fact bank.
 - Do not include an achievement merely to fill space. Omit it if it does not
   support the target role.
+- `basics.url` and `basics.profiles` come only from the fact bank's `basics`
+  block. If `<career>` has no `basics.url`, omit `url` from `basics` entirely.
+  Never use a project homepage, repository URL, or application URL as the
+  candidate's website.
+- Never put a term from the fact bank's `skillExclude` list in
+  `skills[].keywords`. Those terms are valid evidence tags, not resume skills.
 
 ## Research and transferable experience
 
@@ -91,22 +97,25 @@ When you use transferable experience:
 - The final PDF must fit on exactly one page and should fill that page. Aim for
   the richest draft that still fits; the command will trim lower-value content
   if needed.
-- Keep all roles in reverse chronological order. Use 5-6 highlights for the most
-  recent role, 3-4 for the next, and 2 for older roles. Aim for 9-12 work
+- Keep all roles in reverse chronological order. Use 4 highlights for the most
+  recent role, 2-3 for the next, and 1-2 for older roles. Aim for 8-9 work
   highlights total.
 - Lead each highlight with a strong verb and, where possible, the outcome or
   scale. Keep each highlight to one sentence and roughly 30 words or fewer.
 - The summary is exactly 2 sentences, roughly 40 words or fewer, written in
   implied first person (no "I"), and must be supported by the fact bank.
-- Select 2-3 projects. Prefer curated projects. GitHub, organization, and local
+- Select 2 projects. Prefer curated projects. GitHub, organization, and local
   project candidates are allowed only when the repository directly demonstrates
   a requirement and the README or local commit context supports the claim. For
   local checkouts of upstream projects, use only the user's local commit
   messages; do not imply ownership of the upstream project. Do not include a
-  candidate just because it exists.
-- Use 3-4 skill groups with 6-8 keywords each. Keywords must come from the fact
+  candidate just because it exists. For a project entry, use the candidate's
+  repository URL, not its homepage.
+- Use 3 skill groups with 6-8 keywords each. Keywords must come from the fact
   bank's `skillGroups`, achievement/project skills, cited GitHub repositories,
-  or the fact bank's `transferable` terms when their source evidence is cited.
+  or the fact bank's `transferable` terms when their source evidence is cited,
+  and must never come from `skillExclude`. Prefer concrete languages, tools,
+  platforms, and named practices.
 - Set `basics.label` to the target job title from `<application>`. Do not inflate
   seniority beyond the title supplied.
 - Omit optional JSON Resume fields that have no source. Do not add `interests`,

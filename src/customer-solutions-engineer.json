@@ -85,15 +85,31 @@
 	"skills": [
 		{
 			"name": "Integrations & Automation",
-			"keywords": ["REST APIs", "Webhooks", "JSON", "OAuth", "Data Transformation", "Apache Kafka"]
+			"keywords": [
+				"REST APIs",
+				"Webhooks",
+				"JSON",
+				"OAuth",
+				"Apache Kafka"
+			]
 		},
 		{
 			"name": "Development & Data",
-			"keywords": ["TypeScript", "JavaScript", "Java", "Spring Boot", "C#/.NET", "SQL", "Git"]
+			"keywords": [
+				"TypeScript",
+				"JavaScript",
+				"Java",
+				"Spring Boot",
+				"C#/.NET",
+				"SQL",
+				"Git"
+			]
 		},
 		{
 			"name": "Client Delivery",
-			"keywords": ["Requirements Gathering", "Stakeholder Collaboration", "Documentation", "Testing", "Agile/Scrum"]
+			"keywords": [
+				"Agile/Scrum"
+			]
 		}
 	],
 	"education": [

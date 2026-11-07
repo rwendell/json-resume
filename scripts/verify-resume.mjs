@@ -16,6 +16,8 @@ import { fileURLToPath } from 'node:url';
 import jsonResumeSchema from '@jsonresume/schema';
 import { loadCareer } from './lib/career.mjs';
 import { extractNumbers } from './lib/numbers.mjs';
+import { checkBasicsUrl } from './lib/resume-basics.mjs';
+import { findExcludedSkills } from './lib/resume-skills.mjs';
 import {
   findCacheByPdf,
   findCachedJobByAlias,
@@ -263,9 +265,8 @@ function verifyBasics() {
   if (basics.phone && career.basics.phone && basics.phone !== career.basics.phone) {
     errors.push(`basics.phone changed: "${basics.phone}" != "${career.basics.phone}"`);
   }
-  if (basics.url && career.basics.url && basics.url !== career.basics.url) {
-    errors.push(`basics.url changed: "${basics.url}" != "${career.basics.url}"`);
-  }
+  const basicsUrlError = checkBasicsUrl(resume, career);
+  if (basicsUrlError) errors.push(basicsUrlError);
   if (!basics.label) warnings.push('basics.label is empty');
 }
 
@@ -443,6 +444,13 @@ function verifyProjects() {
 function verifySkills() {
   const groups = Array.isArray(resume.skills) ? resume.skills : [];
   if (groups.length === 0) warnings.push('skills is empty');
+
+  const excludedSkills = findExcludedSkills(resume, career);
+  if (excludedSkills.length > 0) {
+    warnings.push(
+      `skills marked too vague for resumes: ${excludedSkills.join(', ')}`,
+    );
+  }
 
   const knownIds = buildKnownIds();
   const direct = new Set();
@@ -635,6 +643,39 @@ function buildKnownIds() {
   return knownIds;
 }
 
+function buildEvidenceText() {
+  const texts = new Map();
+  for (const role of career.roles ?? []) {
+    for (const achievement of role.achievements ?? []) {
+      texts.set(achievement.id, achievement.text ?? '');
+    }
+  }
+  for (const project of career.projects ?? []) {
+    for (const highlight of project.highlights ?? []) {
+      texts.set(highlight.id, highlight.text ?? '');
+    }
+  }
+  for (const repo of candidates ?? github.repos ?? []) {
+    if (repo.included === false) continue;
+    const text = [
+      repo.description,
+      repo.readme,
+      ...(repo.localCommits ?? []),
+    ]
+      .filter(Boolean)
+      .join('\n');
+    for (const id of [
+      candidateEvidence(repo),
+      repo.name,
+      repo.displayName,
+      repo.fullName,
+    ]) {
+      if (id) texts.set(id, text);
+    }
+  }
+  return texts;
+}
+
 function verifyTrace(roles, projects) {
   const requirements = Array.isArray(trace.requirements)
     ? trace.requirements
@@ -710,6 +751,19 @@ function verifyTrace(roles, projects) {
     if (!knownIds.has(id)) {
       errors.push(`trace.summary_evidence[${index}] cites unknown evidence "${id}"`);
     }
+  }
+
+  const evidenceText = buildEvidenceText();
+  const summarySourceText = (trace.summary_evidence ?? [])
+    .map((id) => evidenceText.get(id) ?? '')
+    .filter(Boolean)
+    .join('\n');
+  if (summarySourceText) {
+    checkSummaryNumbers(
+      resume.basics?.summary ?? '',
+      summarySourceText,
+      'basics.summary',
+    );
   }
   for (const [index, requirement] of requirements.entries()) {
     for (const id of requirement.evidence ?? []) {
@@ -832,6 +886,22 @@ function validEvidence(ids, achievements, path) {
 function checkNumbers(output, sourceText, path) {
   const sourceNumbers = new Set(extractNumbers(sourceText));
   for (const number of extractNumbers(output)) {
+    if (!sourceNumbers.has(number)) {
+      errors.push(`${path} contains "${number}", which is not in the cited evidence`);
+    }
+  }
+}
+
+/**
+ * Summaries may make derived duration claims such as "4+ years" that are true
+ * from employment dates but absent from achievement text. Check only metrics
+ * with an explicit unit (5m, 20%, 3x) or a decimal (2.5); leave plain integer
+ * counts to the evidence review.
+ */
+function checkSummaryNumbers(output, sourceText, path) {
+  const sourceNumbers = new Set(extractNumbers(sourceText));
+  for (const number of extractNumbers(output)) {
+    if (!/[a-z%]$/.test(number) && !number.includes('.')) continue;
     if (!sourceNumbers.has(number)) {
       errors.push(`${path} contains "${number}", which is not in the cited evidence`);
     }

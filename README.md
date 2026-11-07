@@ -20,8 +20,8 @@ Intermediate JSON, trace, and job data live in `.cache/tailor/`.
 
 - [aube](https://aube.jdx.dev)
 - [OpenCode CLI](https://opencode.ai) with at least one model configured
-- Optional: an OpenCode Go subscription or OpenRouter credit for fallback when
-  the free model is unavailable
+- OpenRouter credit for the default DeepSeek model; Haiku, OpenCode Go, and the
+  free OpenCode model are fallbacks
 - [GitHub CLI](https://cli.github.com) authenticated with `gh auth login`
 
 Install dependencies:
@@ -54,8 +54,9 @@ The PDF opens automatically in your default viewer. Use `--no-open` when
 running in a script or over SSH.
 
 The resume must fit on exactly one page and should fill it. If the first draft
-is longer, `tailor` trims lower-value content in small steps and re-renders. If
-the result is too sparse (more than roughly two lines short of the printable
+is longer, `tailor` measures the rendered HTML in print layout and trims
+lower-value content until it fits, exporting the PDF only after the layout fits.
+If the result is too sparse (more than roughly two lines short of the printable
 page), it adds unused achievements from the merged fact bank. It fails rather than
 leaving a multi-page or mostly-empty PDF.
 
@@ -71,25 +72,26 @@ aube run verify-resume -- acme-forward-deployed-engineer
 aube run answer -q "Why do you want this role?"
 ```
 
-## When free usage runs out
+## Model providers and fallback
 
 `tailor` and `answer` default to `--provider auto`, which tries providers in
 this order:
 
-1. the free OpenCode model, using `opencode/deepseek-v4.1-flash-free#high`
-2. OpenCode Go, using `opencode-go/deepseek-v4.1-flash#high`
-3. OpenRouter, using `openrouter/deepseek/deepseek-v4.1-flash-1017#high`
+1. OpenRouter DeepSeek, using `openrouter/deepseek/deepseek-v4.1-flash-1017#high`
+   (first attempt capped at 120s)
+2. OpenRouter Haiku, using `openrouter/anthropic/claude-haiku-5.5#low`
+3. OpenCode Go, using `opencode-go/deepseek-v4.1-flash#high`
+4. the free OpenCode model, using `opencode/deepseek-v4.1-flash-free#high`
 
-A provider is retried only when it exits non-zero, returns no JSON object, or
-returns JSON that does not match the expected shape. The command prints which
-provider produced the draft:
+A provider is retried when it exits non-zero, returns no JSON object, returns
+JSON that does not match the expected shape, or exceeds its timeout. The command
+prints which model produced the draft:
 
 ```text
-tailor: OpenCode (opencode/deepseek-v4.1-flash-free#high) failed: exited with status 1; trying the next provider
-tailor: draft from OpenCode Go (opencode-go/deepseek-v4.1-flash#high)
+tailor: draft from OpenRouter (openrouter/deepseek/deepseek-v4.1-flash-1017#high)
 ```
 
-Force a provider when you already know the free quota is gone:
+Force a different provider when you want to change the cost or fallback order:
 
 ```bash
 aube run tailor -- job.md --provider go
@@ -100,22 +102,26 @@ Provider values:
 
 | Value | Meaning |
 | --- | --- |
-| `auto` | Try OpenCode, OpenCode Go, then OpenRouter (default) |
+| `auto` | Try OpenRouter DeepSeek, OpenRouter Haiku, OpenCode Go, then OpenCode free (default) |
 | `opencode` | Free OpenCode model only |
 | `go` | OpenCode Go only |
-| `openrouter` | OpenRouter only |
+| `openrouter` | OpenRouter only: DeepSeek high, then Haiku low |
 
 Environment overrides:
 
 ```bash
-export RESUME_LLM_PROVIDER=go
+export RESUME_LLM_PROVIDER=openrouter
 export OPENCODE_MODEL=opencode/deepseek-v4.1-flash-free#high
 export OPENCODE_GO_MODEL=opencode-go/deepseek-v4.1-flash#high
 export OPENROUTER_MODEL=openrouter/deepseek/deepseek-v4.1-flash-1017#high
+export OPENROUTER_FALLBACK_MODEL=openrouter/anthropic/claude-haiku-5.5#low
 ```
 
-The defaults pin `#high`, DeepSeek's normal thinking effort. They never request
-`#max`. For a faster run, override the Go or OpenRouter model with `#low`:
+The primary OpenRouter attempt is capped at 120s so a stalled DeepSeek run falls
+through to the Haiku fallback instead of holding the command for many minutes.
+The fallback and the other providers use the normal `--timeout` value (default
+600s). The Go and free defaults pin `#high`; override either with `#low` if you
+want a faster fallback:
 
 ```bash
 export OPENCODE_GO_MODEL=opencode-go/deepseek-v4.1-flash#low
@@ -129,7 +135,7 @@ TUI) and select it.
 one model. That is the right choice when you need a specific model, but it will
 not fall back when that model's quota is exhausted.
 
-A typical tailoring run costs a fraction of a cent on the OpenRouter default.
+A typical tailoring run costs under a cent on the OpenRouter default.
 Check the remaining credit with:
 
 ```bash
@@ -410,7 +416,7 @@ Answer options:
 | `--url`, `--description` | Job source when not using a positional input |
 | `--provider` | Model provider: `auto`, `opencode`, `go`, or `openrouter` |
 | `--model` | Use one exact model and skip provider fallback |
-| `--timeout` | Per-provider timeout in seconds |
+| `--timeout` | Per-provider timeout in seconds (OpenRouter primary capped at 120) |
 | `--refresh` | Force a GitHub/org + local project refresh |
 | `--no-sync` | Skip the 24-hour GitHub refresh |
 | `--no-copy` | Do not copy the answer to the clipboard |
@@ -445,6 +451,61 @@ Arrays merge by `id` for roles, achievements, projects, and education; by
 `name` for skill groups; and by `evidence` for `transferable` entries. String
 arrays such as `constraints` and `exclude` are unioned. Scalar values in the
 private file override the public file.
+
+### Control the website on the resume
+
+`basics.url` is opt-in. When the fact bank has no `basics.url`, generated
+resumes omit the website field, even if a project or GitHub repository has a
+homepage. This keeps a resume-only site (such as GitHub Pages) off the resume.
+Tailoring enforces this after generation, and `verify-resume` rejects a URL that
+is not in the fact bank. When the site becomes a portfolio, add it back in the
+public fact bank:
+
+```yaml
+# data/career.yml
+basics:
+  url: https://example.com/
+```
+
+Keep the website in `data/career.yml` rather than the private overlay; it is
+public information, and keeping it in the public fact bank means every machine
+sees the same switch.
+
+To keep a resume-only site out of project candidates entirely, add its
+repository name to `github.exclude` and `local.exclude` below. Remove those
+entries when the site is worth showing as a project.
+
+The current `rwendell.github.io` site follows this pattern. To restore it when
+it becomes a portfolio:
+
+1. Add `url: https://rwendell.github.io/` under `basics:` in `data/career.yml`.
+2. Remove the two `rwendell.github.io` entries from `github.exclude` and
+   `local.exclude` in the same file.
+3. Regenerate the generic resume:
+
+   ```bash
+   aube run tailor --generic
+   ```
+
+   That updates `src/software-engineer.json`. Other published resumes keep
+   their existing contact block until they are re-tailored, so regenerate or
+   edit those separately if you want the URL on every resume.
+
+### Keep vague skills out of the skills section
+
+Some skills are true but too generic to list on a resume, such as “Testing”,
+“Development”, or “Deployment”. Put them under `skillExclude` in
+`data/career.yml`. They remain valid evidence tags on achievements and projects,
+but generated resumes omit them from the skills section. `verify-resume` warns
+if one reappears, and the tailoring agent prefers concrete languages, tools,
+platforms, and named practices.
+
+```yaml
+skillExclude:
+  - testing
+  - development
+  - deployment
+```
 
 Each achievement needs a stable `id` so the verifier can prove the generated
 bullet is grounded:
@@ -614,7 +675,7 @@ Common `tailor` options:
 | `--no-publish` | Keep the generated resume private |
 | `--no-sync` | Skip the 24-hour GitHub refresh |
 | `--debug` | Save the prompt and raw OpenCode output |
-| `--timeout` | Per-provider timeout in seconds (default 600) |
+| `--timeout` | Per-provider timeout in seconds (default 600; OpenRouter primary capped at 120) |
 
 ## Publishing manual resumes
 
@@ -705,10 +766,10 @@ aube exec --no-install -- puppeteer browsers install chrome
 ```
 
 **The PDF is still longer than one page.** `tailor` trims lower-value bullets,
-projects, and skill keywords automatically, then fails if it still cannot fit.
-If that happens, target a more focused job description or remove lower-value
-content from the merged fact bank. The multi-page PDF and cache are preserved
-for inspection.
+projects, and skill keywords automatically, measuring the HTML layout before
+each step, then fails if it still cannot fit. The cache and any rendered PDF are
+preserved for inspection. If that happens, target a more focused job description
+or remove lower-value content from the merged fact bank.
 
 **The PDF is too sparse.** `tailor` first tries unused achievements from
 the merged fact bank to fill the page. If none fit, add more achievements to
@@ -751,7 +812,9 @@ scripts/lib/llm.mjs           Provider chain and fallback selection
 scripts/lib/open-file.mjs     Desktop preview opener fallbacks
 scripts/lib/clipboard.mjs     Clipboard copy fallbacks
 scripts/lib/numbers.mjs       Numeric suffix normalization
+scripts/lib/resume-basics.mjs Opt-in website (basics.url) policy
 scripts/lib/resume-format.mjs Theme punctuation normalization
+scripts/lib/resume-skills.mjs Vague-skill filtering for the skills section
 scripts/lib/one-page.mjs      One-page trimming and fill expansion
 scripts/lib/page-fill.mjs     HTML layout fill measurement
 scripts/lib/pdf.mjs           PDF page counting
