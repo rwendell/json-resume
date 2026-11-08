@@ -74,6 +74,11 @@ if (options.help) {
   process.exit(0);
 }
 
+if (!options.generic && !options.input && !options.description && !options.url) {
+  options.generic = true;
+  options.genericAuto = true;
+}
+
 let career;
 try {
   career = loadCareer(rootDir).career;
@@ -85,6 +90,9 @@ let job;
 if (options.generic) {
   if (options.input) {
     fail('--generic builds a general resume and does not take a job file or URL.');
+  }
+  if (options.genericAuto) {
+    console.log('tailor: no job source provided; building the generic resume');
   }
   const generic = career.generic ?? {};
   job = {
@@ -874,11 +882,13 @@ function printHelp() {
   console.log(`Usage:
   aube run tailor -- <job.md | job-url> [options]
   aube run tailor -- --title "<title>" [--company "<company>"] [--description <file|text|url>]
+  aube run tailor [options]        # no job source -> generic resume
 
 Options:
   --title <text>         Job title (overrides page/file metadata)
   --company <text>       Company name
   --generic              Build a general-purpose resume from the fact bank
+                         (default when no job file, URL, or description is given)
   --url <url>            Job posting URL (also fetched when used alone)
   --description <value>  Job description text, file path, or URL
   --slug <name>          Cache/application slug (default: company-title)

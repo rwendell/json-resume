@@ -264,8 +264,13 @@ For a general-purpose resume that is not tied to one job:
 
 ```bash
 aube run tailor --generic
+# or simply:
+aube run tailor
 # generated/resumes/resume-generic.pdf
 ```
+
+Running with no job file, URL, or description also builds the generic resume;
+`--generic` is still accepted for clarity.
 
 The generic criteria live in `data/career.yml` under `generic:`. By default it
 prioritizes high-`strength` achievements, quantified outcomes, breadth across
@@ -663,7 +668,7 @@ Common `tailor` options:
 | Option | Purpose |
 | --- | --- |
 | `--title`, `--company` | Override metadata from the URL or file |
-| `--generic` | Build a general-purpose resume from the fact bank |
+| `--generic` | Build a general-purpose resume from the fact bank (default when no job source is given) |
 | `--slug` | Choose the cache/answer key |
 | `--provider` | Model provider: `auto`, `opencode`, `go`, or `openrouter` |
 | `--model` | Use one exact model and skip provider fallback |
