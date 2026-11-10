@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { parse as parseYaml } from 'yaml';
+import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
 import { fetchJobPage, isUrl, JobPageError } from './job-page.mjs';
 
 /**
@@ -12,6 +12,7 @@ export async function readJobInput(opts) {
   let body = '';
   let source = opts.input || opts.description || opts.url || 'job';
   let meta = {};
+  let details = {};
 
   const urlSource = isUrl(opts.input)
     ? opts.input
@@ -25,6 +26,7 @@ export async function readJobInput(opts) {
     try {
       const page = await fetchJobPage(urlSource);
       body = page.body;
+      details = isPlainObject(page.details) ? page.details : {};
       meta = {
         title: page.title,
         company: page.company,
@@ -50,6 +52,9 @@ export async function readJobInput(opts) {
     const raw = readFileSync(inputPath, 'utf8');
     const frontmatter = splitFrontmatter(raw);
     meta = frontmatter.meta;
+    details = isPlainObject(frontmatter.meta.details)
+      ? frontmatter.meta.details
+      : {};
     body = frontmatter.body;
   }
 
@@ -81,6 +86,7 @@ export async function readJobInput(opts) {
     url: String(url).trim(),
     body: body.trim(),
     source,
+    details,
   };
 }
 
@@ -117,15 +123,20 @@ export function yamlString(value) {
 }
 
 export function formatJobMarkdown(job) {
-  return [
+  const lines = [
     '---',
     `company: ${yamlString(job.company)}`,
     `title: ${yamlString(job.title)}`,
     `url: ${yamlString(job.url)}`,
     `captured: ${new Date().toISOString().slice(0, 10)}`,
-    '---',
-    '',
-    job.body.trim(),
-    '',
-  ].join('\n');
+  ];
+  if (isPlainObject(job.details) && Object.keys(job.details).length > 0) {
+    lines.push(...stringifyYaml({ details: job.details }).trim().split('\n'));
+  }
+  lines.push('---', '', job.body.trim(), '');
+  return lines.join('\n');
+}
+
+function isPlainObject(value) {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
 }

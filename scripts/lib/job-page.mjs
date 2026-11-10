@@ -17,6 +17,7 @@ const JOB_BOARD_HOSTS = [
   'brassring.com',
   'recruitee.com',
   'workable.com',
+  'upwork.com',
 ];
 
 const FETCH_HEADERS = {
@@ -33,10 +34,42 @@ export function isUrl(value) {
   return /^https?:\/\//i.test(String(value ?? '').trim());
 }
 
+export function isUpworkUrl(value) {
+  try {
+    const host = new URL(String(value)).hostname.replace(/^www\./, '');
+    return host === 'upwork.com' || host.endsWith('.upwork.com');
+  } catch {
+    return false;
+  }
+}
+
+export function isUpworkSavedJobUrl(value) {
+  return /^https?:\/\/(?:www\.)?upwork\.com\/nx\/search\/jobs\/saved\/details\//i.test(
+    String(value ?? ''),
+  );
+}
+
+export function isUpworkSearchUrl(value) {
+  return /^https?:\/\/(?:www\.)?upwork\.com\/(?:nx\/search\/jobs|jobs\/search)(?:\/|\?|$)/i.test(
+    String(value ?? ''),
+  );
+}
+
 export async function fetchJobPage(
   url,
   { timeout = 20000, browserFallback = true } = {},
 ) {
+  if (isUpworkSavedJobUrl(url)) {
+    throw new JobPageError(
+      'This is an Upwork saved-jobs modal URL that only works inside your logged-in Upwork session. Open the job and copy its public /jobs/... URL, or save the job description to a file and pass the file path instead.',
+    );
+  }
+  if (isUpworkSearchUrl(url)) {
+    throw new JobPageError(
+      'This is an Upwork search URL, not a job posting. Open the job and copy its public /jobs/... URL, or save the job description to a file and pass the file path instead.',
+    );
+  }
+
   try {
     return await fetchJobPageWithHttp(url, timeout);
   } catch (httpError) {
@@ -88,6 +121,11 @@ async function fetchJobPageWithHttp(url, timeout) {
 }
 
 async function fetchJobPageWithBrowser(url, timeout) {
+  const html = await fetchRenderedHtml(url, { timeout });
+  return extractJobFromHtml(html, url);
+}
+
+export async function fetchRenderedHtml(url, { timeout = 20000 } = {}) {
   let browser;
   try {
     const puppeteer = (await import('puppeteer')).default;
@@ -102,11 +140,10 @@ async function fetchJobPageWithBrowser(url, timeout) {
       await page.goto(url, { waitUntil: 'networkidle2', timeout });
     } catch (error) {
       if (error.name !== 'TimeoutError') throw error;
-      // A slow page may still have rendered the job content.
+      // A slow page may still have rendered the content.
     }
 
-    const html = await page.content();
-    return extractJobFromHtml(html, url);
+    return await page.content();
   } finally {
     if (browser) await browser.close();
   }
@@ -114,6 +151,24 @@ async function fetchJobPageWithBrowser(url, timeout) {
 
 export function extractJobFromHtml(html, url = '') {
   const $ = cheerio.load(html);
+  const pageTitle = textOf($('title').first().text());
+  const visibleText = $('body')
+    .clone()
+    .find('script, style, noscript')
+    .remove()
+    .end()
+    .text();
+
+  if (looksLikeBlockedPage(visibleText, pageTitle)) {
+    throw new JobPageError(
+      `Could not load ${url || 'the job page'}: the site returned a login or bot-check page. Save the job description to a file and pass the file path instead, or pass --title and --company with --description.`,
+    );
+  }
+
+  if (isUpworkUrl(url)) {
+    return extractUpworkJob($, url);
+  }
+
   const posting = findJobPosting($);
 
   let title = posting ? textOf(posting.title) : '';
@@ -152,6 +207,145 @@ export function extractJobFromHtml(html, url = '') {
   }
 
   return { title, company, body, url, source: 'url' };
+}
+
+function extractUpworkJob($, url) {
+  const rawTitle =
+    textOf($('h1').first().text()) || textOf($('title').first().text());
+  const title = cleanUpworkTitle(rawTitle);
+  if (/^search freelance jobs/i.test(title)) {
+    throw new JobPageError(
+      'This Upwork URL points at a search page, not a job posting. Open the job and copy its public /jobs/... URL, or save the job description to a file and pass the file path instead.',
+    );
+  }
+
+  const posting = findJobPosting($);
+  let body = posting?.description ? toText(posting.description) : '';
+  if (!body) {
+    const description = $('[data-test="Description"]').first();
+    body = description.length
+      ? toText(String(description.html() ?? '').replace(/\n/g, '<br>'))
+      : '';
+  }
+  if (body.length < 80) {
+    throw new JobPageError(
+      `Could not extract the Upwork job description from ${url}. Upwork may be showing a bot check or a page that needs a logged-in session. Save the job text to a file and pass the file instead.`,
+    );
+  }
+
+  return {
+    title,
+    company: '',
+    body,
+    url,
+    source: 'url',
+    details: extractUpworkDetails($),
+  };
+}
+
+function extractUpworkDetails($) {
+  const details = {};
+
+  $('ul.features > li').each((_, element) => {
+    const item = $(element);
+    const fullText = normalizeText(item.text()).replace(/\s+/g, ' ').trim();
+    const label = normalizeText(
+      item.clone().find('strong').remove().end().text(),
+    )
+      .replace(/\s+/g, ' ')
+      .replace(/^[-–—:\s]+/, '')
+      .trim();
+    let value = textOf(item.find('strong').first().text());
+    if (label && fullText.toLowerCase().endsWith(label.toLowerCase())) {
+      value = fullText.slice(0, -label.length).replace(/[-–—:\s]+$/, '').trim();
+    }
+    if (!value) return;
+
+    const key = label.toLowerCase();
+    if (key === 'duration') {
+      details.duration = value;
+    } else if (key === 'experience level') {
+      details.experienceLevel = value;
+    } else if (key === 'project type') {
+      details.projectType = value;
+    } else if (key === 'hourly' || key === 'fixed-price') {
+      details.budgetType = key === 'fixed-price' ? 'fixed' : 'hourly';
+      if (/^\$/.test(value)) details.budget = value;
+      else details.workload = value;
+    } else if (!key) {
+      if (/hrs?\s*\/\s*week|hours?\s*\/\s*week/i.test(value)) {
+        details.workload = value;
+      } else if (/remote|onsite|hybrid/i.test(value)) {
+        details.jobLocation = value;
+      } else {
+        details[label] = value;
+      }
+    } else {
+      details[label] = value;
+    }
+  });
+
+  const jobHeader = $('h1').first().closest('header');
+  const posted = jobHeader.find('.posted-on-line').first().text();
+  if (posted.trim()) details.posted = normalizeText(posted);
+
+  const jobLocation = toText(jobHeader.find('p').first().html() ?? '').replace(
+    /([.!?])(?=[A-Z])/g,
+    '$1 ',
+  );
+  if (jobLocation) details.jobLocation = jobLocation;
+
+  const skillsHeading = $('h3, h4, h5')
+    .filter((_, element) => /skills and expertise/i.test($(element).text()))
+    .first();
+  if (skillsHeading.length) {
+    const skills = [];
+    skillsHeading
+      .closest('section')
+      .find('.air3-badge')
+      .each((_, element) => {
+        const text = textOf($(element).text()).replace(/\s+/g, ' ').trim();
+        if (
+          text &&
+          !/^\+\s*\d+\s+more$/i.test(text) &&
+          !skills.includes(text)
+        ) {
+          skills.push(text);
+        }
+      });
+    if (skills.length > 0) details.skills = skills;
+  }
+
+  const clientSection = $('.cfe-about-client-v2').first();
+  if (clientSection.length) {
+    const client = toText(clientSection.html())
+      .replace(/^About the client\s*/i, '')
+      .replace(/\n\s*\*\s*/g, '\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .replace(/([A-Za-z])(\d{1,2}:\d{2})/g, '$1 $2')
+      .trim();
+    if (client) details.client = client;
+
+    const location = toText(
+      clientSection.find('[data-qa="client-location"]').html() ?? '',
+    ).replace(/([A-Za-z])(\d{1,2}:\d{2})/g, '$1 $2');
+    if (location) details.clientLocation = location;
+
+    const memberSince = toText(
+      clientSection.find('[data-qa="client-contract-date"]').html() ?? '',
+    );
+    if (memberSince) details.clientMemberSince = memberSince;
+  }
+
+  return details;
+}
+
+function cleanUpworkTitle(value) {
+  return String(value ?? '')
+    .replace(/\s+/g, ' ')
+    .replace(/\s*[|]\s*Upwork\s*$/i, '')
+    .replace(/\s*-\s*Upwork\s*$/i, '')
+    .trim();
 }
 
 function findJobPosting($) {
@@ -213,7 +407,7 @@ function cleanTitle(value) {
     .replace(/\s+/g, ' ')
     .replace(/^Job Application for\s+/i, '')
     .replace(
-      /\s*[|•-]\s*(LinkedIn|Indeed|Glassdoor|Greenhouse|Lever|Workday|Ashby|SmartRecruiters)\b.*$/i,
+      /\s*[|•-]\s*(LinkedIn|Indeed|Glassdoor|Greenhouse|Lever|Workday|Ashby|SmartRecruiters|Upwork)\b.*$/i,
       '',
     )
     .trim();
@@ -267,9 +461,23 @@ function isJobBoardHost(host) {
   );
 }
 
-function looksLikeBlockedPage(text) {
+function looksLikeBlockedPage(text, title = '') {
+  if (
+    /attention required!?\s*\|?\s*cloudflare|just a moment\.\.\.|cf-error-details|challenge-platform/i.test(
+      title,
+    )
+  ) {
+    return true;
+  }
+  if (
+    /^\s*(?:please enable cookies\.?\s*)?sorry, you have been blocked|^\s*enable javascript and cookies to continue|^\s*verify you are human|^\s*access denied\b/i.test(
+      text,
+    )
+  ) {
+    return true;
+  }
   if (text.length >= 500) return false;
-  return /\b(sign in|log in|create an account|enable javascript|access denied|verify you are human|are you a robot)\b/i.test(
+  return /\b(sign in|log in|create an account|enable javascript|access denied|are you a robot)\b/i.test(
     text,
   );
 }

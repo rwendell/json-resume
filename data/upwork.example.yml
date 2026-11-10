@@ -1,0 +1,47 @@
+# Upwork proposal defaults for `aube run proposal`.
+#
+# Copy this file to data/upwork.yml and edit it. data/upwork.yml is gitignored
+# so your rate and availability do not have to be published. Every field is
+# optional; CLI flags override these values.
+
+# Public Upwork profile. When set, public values fill name, title, location,
+# rate, skills, and portfolio; hours per week is used when present. Values below
+# and CLI flags override.
+profile:
+  url: "" # e.g. https://www.upwork.com/freelancers/~01fbe3cf033cea5004
+
+# Your standard rate. Used in proposals only when includeRate is true, and for
+# the bid/no-bid warning against a job's stated budget. Leave amount null to
+# use the public profile rate.
+rate:
+  type: hourly # hourly | fixed
+  amount: null # e.g. 85
+  currency: USD
+
+# Warn when an hourly job's maximum budget is below this. Leave null to disable.
+minHourlyRate: null
+
+# Logistics included when includeAvailability is true.
+availability: "" # e.g. "20-30 hrs/week; UK overlap until 6pm GMT"
+timezone: "" # e.g. "US Eastern"
+timeline: "" # e.g. "2 weeks"; --timeline overrides
+
+proposal:
+  targetWords: 180
+  minWords: 120
+  maxWords: 260
+  maxChars: 5000
+  includeRate: false
+  includeAvailability: true
+
+# Soft hint: evidence ids or project names to prefer when relevant. The agent still chooses the final `samples` based on the job; this list does not filter or rank candidates.
+preferredSamples: []
+
+# The verifier warns when a proposal contains these generic phrases. The
+# built-in defaults are always included.
+bannedPhrases:
+  - "I hope this message finds you well"
+  - "Dear Hiring Manager"
+  - "I am excited to apply"
+  - "I am the perfect fit"
+  - "I would be a great fit"

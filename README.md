@@ -72,10 +72,16 @@ aube run verify-resume -- acme-forward-deployed-engineer
 aube run answer -q "Why do you want this role?"
 ```
 
+### Write an Upwork proposal
+
+```bash
+aube run proposal 'https://www.upwork.com/jobs/Example_~022119...'
+```
+
 ## Model providers and fallback
 
-`tailor` and `answer` default to `--provider auto`, which tries providers in
-this order:
+`tailor`, `answer`, and `proposal` default to `--provider auto`, which tries
+providers in this order:
 
 1. OpenRouter DeepSeek, using `openrouter/deepseek/deepseek-v4.1-flash-1017#high`
    (first attempt capped at 120s)
@@ -154,7 +160,8 @@ aube run tailor -- https://boards.example.com/acme/jobs/123
 
 The command fetches the page, prefers schema.org `JobPosting` JSON-LD, and falls
 back to readable page text. JavaScript-heavy pages are retried with headless
-Chrome.
+Chrome. Public Upwork `/jobs/...` URLs are supported and their budget, workload,
+experience level, skills, and client details are saved with the job.
 
 If the site requires login or blocks scraping, save the description to a file
 and use option 2 instead. You can also supply overrides:
@@ -307,6 +314,22 @@ These files are public if the repository is public. A company-specific tailored
 resume with a matching title will replace the published version; use
 `--no-publish` when that is not what you want.
 
+### Publish a dossier-generated resume
+
+`dossier` writes `resume-<slug>.json` to the current directory. Publish that
+file here:
+
+```bash
+aube run publish -- /path/to/resume-<slug>.json
+aube run publish -- /path/to/resume-<slug>.pdf --name my-resume
+aube run publish -- resume.json --dry-run
+aube run publish -- resume.json --no-build
+```
+
+The command validates the JSON Resume, writes `src/<name>.json`, and rebuilds
+`dist/` unless `--no-build` is passed. It does not commit; review the diff and
+push when ready.
+
 ## Explain project scoring
 
 ```bash
@@ -422,9 +445,165 @@ Answer options:
 | `--no-copy` | Do not copy the answer to the clipboard |
 | `--debug` | Save the prompt and raw OpenCode output |
 
+The `--` separator is optional for a URL, file, or slug. Use it when the first
+script argument is a flag `aube` also defines — notably `-h` or `--help` — or
+whenever you want to force every following argument to the script unchanged.
+
 Aube reserves exact `-h` for its own help. Without `--`, use `--hint "..."`,
 `-H "..."`, or `-h="..."`; `-h "..."` works after `--` or when invoking the
 script directly.
+
+## Write Upwork proposals
+
+`proposal` uses the same job context, fact bank, GitHub candidates, and cached
+resume/trace as `tailor` and `answer`, but produces a paste-ready Upwork
+proposal, screening answers, rate/timeline, and suggested portfolio samples:
+
+```bash
+# public Upwork job URL (no separator needed for a positional URL)
+aube run proposal 'https://www.upwork.com/jobs/Example_~022119...'
+
+# use public profile values as defaults
+aube run proposal 'https://www.upwork.com/jobs/Example_~022119...' \
+  --profile 'https://www.upwork.com/freelancers/~01fbe3cf033cea5004'
+
+# saved job text with client context and a rate
+aube run proposal job.md \
+  --client client.txt \
+  --rate 85 \
+  --availability "20-30 hrs/week, UK overlap until 6pm GMT"
+
+# reuse a generated resume/cache and answer a screening question
+aube run proposal acme-forward-deployed-engineer \
+  -q "How would you approach the first two weeks?"
+
+# several screening questions, one per line
+aube run proposal job.md --questions screening.txt
+```
+
+Public Upwork `/jobs/...` URLs are fetched with the headless browser fallback.
+Saved-jobs modal URLs (`/nx/search/jobs/saved/details/...`) and search URLs need
+your logged-in session and are rejected. Open the job and copy its public URL,
+or save the description to a file. Upwork may also show a Cloudflare check; if
+so, paste the job text into a file and pass that instead.
+
+If `profile.url` is set in `data/upwork.yml` or `--profile` is passed, the public
+profile supplies name, title, location, rate, skills, and portfolio defaults.
+Hours per week is used when present in the page data. `data/upwork.yml` and CLI
+flags still override those values. Profile data is cached for 24 hours under
+`.cache/upwork/`; `--refresh` forces a fetch.
+
+Proposals are written to:
+
+```text
+generated/proposals/upwork-<slug>.md
+generated/proposals/upwork-<slug>.json
+```
+
+The Markdown file is the proposal text only, ready to paste. The JSON file
+contains the job details, client context, screening answers, rate, timeline,
+samples, claims/evidence, gaps, fit assessment, and provider/cost. The proposal
+is printed to the terminal and copied to the clipboard by default. Use `--name`
+to keep multiple variants for the same job:
+
+```bash
+aube run proposal acme-data-engineer --name short --rate 85
+```
+
+The verifier checks every factual claim against the fact bank, project
+candidates, public profile, client context, or hint; validates numbers;
+enforces any required opening word or phrase from the job post; warns about
+generic phrases, length, and placeholders; and reports gaps instead of
+inventing experience.
+
+Proposal options:
+
+| Option | Purpose |
+| --- | --- |
+| `--client <text or file>` | Client context: spend, hire rate, location, payment status |
+| `--profile <url>` | Public Upwork profile for defaults |
+| `--no-profile` | Ignore `profile.url` from `data/upwork.yml` |
+| `--question, -q <text or file>` | Screening question (repeatable) |
+| `--questions <file>` | One screening question per line |
+| `--hint, -h, -H <text or file>` | Extra positioning or tone guidance |
+| `--rate <amount>` | Hourly rate or fixed bid; also enables rate in the proposal |
+| `--rate-type <hourly\|fixed>` | Rate type (default: `hourly`) |
+| `--no-rate` | Keep the rate out of the proposal text |
+| `--timeline <text>` | Delivery timeline, e.g. `"2 weeks"` |
+| `--availability <text>` | Availability, e.g. `"20 hrs/week, UK overlap"` |
+| `--slug <name>` | Generated resume/cache slug to reuse |
+| `--name <name>` | Proposal filename suffix |
+| `--title`, `--company` | Override job metadata |
+| `--url`, `--description` | Job source when not using a positional input |
+| `--provider` | Model provider: `auto`, `opencode`, `go`, or `openrouter` |
+| `--model` | Use one exact model and skip provider fallback |
+| `--timeout` | Per-provider timeout in seconds (default 600) |
+| `--refresh` | Force a GitHub/org, local project, and profile refresh |
+| `--no-sync` | Skip the 24-hour GitHub refresh |
+| `--no-copy` | Do not copy the proposal to the clipboard |
+| `--debug` | Save the prompt and raw OpenCode output |
+
+The `--` separator is optional for a URL, file, or slug. Use it when the first
+script argument is a flag `aube` also defines — notably `-h` or `--help` — or
+whenever you want to force every following argument to the script unchanged.
+
+Aube reserves exact `-h` for its own help. Without `--`, use `--hint "..."`,
+`-H "..."`, or `-h="..."`; `-h "..."` works after `--` or when invoking the
+script directly.
+
+### Proposal defaults
+
+Copy the example config and edit it:
+
+```bash
+cp data/upwork.example.yml data/upwork.yml
+```
+
+`data/upwork.yml` is gitignored so your rate and availability do not have to be
+published:
+
+```yaml
+profile:
+  url: "https://www.upwork.com/freelancers/~01fbe3cf033cea5004"
+
+rate:
+  type: hourly
+  amount: 85 # overrides the public profile rate
+  currency: USD
+
+minHourlyRate: 85
+
+availability: "20-30 hrs/week; UK overlap until 6pm GMT"
+timezone: "US Eastern"
+timeline: "" # e.g. "2 weeks"; --timeline overrides
+
+proposal:
+  targetWords: 180
+  minWords: 120
+  maxWords: 260
+  maxChars: 5000
+  includeRate: false
+  includeAvailability: true
+```
+
+- `profile.url` is optional. The public profile supplies name, title, location,
+  rate, skills, and portfolio; hours per week is used when present.
+- If `rate.amount` is null, the public profile rate is used. If `availability`
+  is empty, the public profile hours per week is used.
+- If `preferredSamples` is non-empty, it replaces the portfolio-derived samples
+  from the public profile.
+- Precedence is: CLI flags, then `data/upwork.yml`, then the public profile.
+- Public profiles do not expose your rate floor, timezone, proposal length,
+  banned phrases, or private availability; keep those in this file.
+- `rate` is only written into the proposal when `includeRate` is true or
+  `--rate` is passed. Use `--no-rate` to keep the rate as metadata only.
+- `minHourlyRate` prints a warning when an hourly job's maximum budget is below
+  your floor.
+- `timeline` is used unless `--timeline` overrides it.
+- `targetWords`/`minWords`/`maxWords` produce length warnings, not hard failures.
+- `maxChars` is a hard verification failure because Upwork rejects overly long
+  cover letters.
+- `bannedPhrases` are added to the built-in generic-phrase checks.
 
 ## Edit your career fact bank
 
@@ -545,10 +724,11 @@ transferable:
 - Put anything you do not want claimed in `constraints`.
 - If a requirement has no evidence, let the tool report a gap.
 
-The tailoring and answer agents may research the target company, role, or an
-unfamiliar technology online. Web content can shape wording and context, but it
-is never evidence for a claim about your experience. The fact bank and project
-candidates remain the only sources for candidate facts.
+The tailoring, answer, and proposal agents may research the target company,
+role, or an unfamiliar technology online. Web content can shape wording and
+context, but it is never evidence for a claim about your experience. The fact
+bank, project candidates, and user-provided hints or client context remain the
+sources for candidate facts.
 
 ### Pull the private PII overlay from a secret gist
 
@@ -597,9 +777,9 @@ You normally do not need to run these manually:
 - `tailor` rescans local `~/projects` on every run and refreshes GitHub/org
   metadata when it is missing or older than 24 hours.
 - `tailor --refresh` forces the GitHub/org and local refresh immediately.
-- `answer` reuses the candidate list from the generated resume when one exists.
-  Regenerate the resume to pick up new projects. Without a cached resume, it
-  refreshes stale sources automatically; `--refresh` forces it.
+- `answer` and `proposal` reuse the candidate list from the generated resume when
+  one exists. Regenerate the resume to pick up new projects. Without a cached
+  resume, they refresh stale sources automatically; `--refresh` forces it.
 
 `sync-github` pulls:
 
@@ -652,6 +832,8 @@ contain private org READMEs and local project paths. Do not commit them.
 | `aube run score-projects -- <job or --generic>` | Explain project candidate scores |
 | `aube run answer -q "..."` | Answer using the most recent tailor run |
 | `aube run answer -- <job or slug> -q "..."` | Answer for a specific job |
+| `aube run proposal <job or slug>` | Write an Upwork proposal for a job |
+| `aube run publish -- <resume.json>` | Publish a dossier-generated resume into `src/` |
 | `aube run verify-resume -- <file or slug>` | Verify a generated resume and trace |
 | `aube run sync-github` | Refresh GitHub, org, and local project metadata |
 | `aube run sync-local` | Refresh only local `~/projects` metadata |
@@ -711,9 +893,11 @@ aube run render -- software-engineer jsonresume-theme-even
 
 ## Privacy
 
-- `generated/` and `.cache/` are gitignored. Tailored resumes and generated
-  answers contain company names and application-specific positioning; keep them
-  private.
+- `generated/` and `.cache/` are gitignored. Tailored resumes, generated
+  answers, and Upwork proposals contain company names, client details, and
+  application-specific positioning; keep them private.
+- `data/upwork.yml` is gitignored so your rate, availability, and bid floor do
+  not have to be published. Use `data/upwork.example.yml` as the template.
 - `src/*.json` is **public**: the publish workflow mirrors every file there to
   the website and gist. Do not put tailored resumes in `src/`.
 - `data/github.json` and `data/local-projects.json` are gitignored because they
@@ -734,6 +918,9 @@ aube run render -- software-engineer jsonresume-theme-even
 
 **The URL will not load or only shows a login page.** Save the job text to a file
 and run `aube run tailor -- job.md`. Many job boards block automated requests.
+For Upwork, use a public `/jobs/...` URL; saved-jobs modal and search URLs need
+your logged-in session and are rejected. If Upwork shows a Cloudflare check,
+paste the job text into a file and pass that instead.
 
 **The title or company is wrong.** Pass `--title` and `--company` explicitly.
 
@@ -758,6 +945,18 @@ exists, it cannot guess.
 command. Regenerate, or ask a narrower question that maps to specific
 achievements. Answers with no factual claims (for example, questions to ask the
 interviewer) are allowed but may print a review warning.
+
+**A proposal fails verification.** Read the errors first. Common causes are a
+claim with no evidence, a sample citing a project that was not a candidate, or a
+missing required opening word from the job post. Raw output is saved next to the
+proposal for inspection. If the job's budget is below your `minHourlyRate`, the
+command warns before the model runs; that is a bid/no-bid signal, not an error.
+
+**The profile values look wrong or the profile will not load.** The public
+profile is cached for 24 hours under `.cache/upwork/`; pass `--refresh` to fetch
+it again. If Upwork blocks the profile fetch, the command falls back to a stale
+cache, then to `data/upwork.yml`. Use `--no-profile` to ignore the configured
+profile entirely, or put the values in `data/upwork.yml` as overrides.
 
 **PDF rendering fails.** Check that Chromium is available with:
 
@@ -785,11 +984,15 @@ path manually or pass `--no-open`.
 ```text
 data/career.yml               Public career fact bank
 data/career.private.yml       Private PII overlay (gitignored)
+data/upwork.example.yml       Upwork proposal defaults template
+data/upwork.yml               Local rate/availability config (gitignored)
 data/github.json              Synced GitHub/org metadata (gitignored)
 data/local-projects.json      Scanned ~/projects metadata (gitignored)
 generated/resumes/            Private tailored PDFs (gitignored)
 generated/answers/            Private application/interview answers (gitignored)
+generated/proposals/          Private Upwork proposals (gitignored)
 .cache/tailor/                Intermediate resume JSON/trace (gitignored)
+.cache/upwork/                Cached public Upwork profile data (gitignored)
 src/                          Published resume JSON source files
 scripts/build.mjs             HTML, PDF, and index generation
 scripts/validate.mjs          JSON Resume validation
@@ -798,13 +1001,20 @@ scripts/sync-github.mjs       GitHub/org metadata sync + local trigger
 scripts/sync-local-projects.mjs Local ~/projects discovery
 scripts/tailor.mjs            Job -> one-page PDF orchestration
 scripts/answer.mjs            Job/question -> grounded application answer
+scripts/proposal.mjs          Job -> grounded Upwork proposal
+scripts/publish.mjs           Publish a generated resume JSON into src/
 scripts/pull-private.mjs       Pull private PII overlay from a secret gist
 scripts/score-projects.mjs    Project scoring explainer
 scripts/verify-resume.mjs     Schema, trace, evidence, and one-page checks
 scripts/clean-cache.mjs       Remove intermediate resume cache
 scripts/lib/career.mjs        Public/private fact-bank merge
 scripts/lib/job-input.mjs     Job URL/file/frontmatter parsing
-scripts/lib/job-page.mjs      Job URL fetching and HTML extraction
+scripts/lib/job-page.mjs      Job URL fetching, Upwork extraction, blocked-page checks
+scripts/lib/job-context.mjs   Shared job resolution and project candidate sync
+scripts/lib/answer-verify.mjs Shared claim/evidence/number verification
+scripts/lib/proposal-verify.mjs Upwork proposal shape and style verification
+scripts/lib/upwork.mjs        Upwork config, budget, and required-opening helpers
+scripts/lib/upwork-profile.mjs Public profile fetch, cache, and portfolio mapping
 scripts/lib/github-projects.mjs Project candidate selection/scoring
 scripts/lib/output-paths.mjs  PDF naming, cache metadata, aliases
 scripts/lib/opencode.mjs      OpenCode invocation and output parsing
@@ -818,7 +1028,7 @@ scripts/lib/resume-skills.mjs Vague-skill filtering for the skills section
 scripts/lib/one-page.mjs      One-page trimming and fill expansion
 scripts/lib/page-fill.mjs     HTML layout fill measurement
 scripts/lib/pdf.mjs           PDF page counting
-.opencode/agents/             OpenCode tailoring and answer agents
+.opencode/agents/             OpenCode tailoring, answer, and proposal agents
 .github/workflows/publish.yml Build, gist mirror, and deployment
 ```
 

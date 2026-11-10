@@ -9,37 +9,20 @@
  *   aube run answer -- acme-forward-deployed-engineer --question "..."
  *   aube run answer -- job.md --question question.txt
  */
-import { spawnSync } from 'node:child_process';
-import {
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  statSync,
-  writeFileSync,
-} from 'node:fs';
-import { basename, dirname, join, resolve } from 'node:path';
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { stringify as stringifyYaml } from 'yaml';
 import { loadCareer } from './lib/career.mjs';
-import {
-  formatJobMarkdown,
-  readJobInput,
-  slugify,
-} from './lib/job-input.mjs';
-import {
-  loadGithub,
-  loadLocal,
-  selectProjects,
-  shouldSyncGithub,
-  shouldSyncLocal,
-} from './lib/github-projects.mjs';
+import { formatJobMarkdown, slugify } from './lib/job-input.mjs';
 import { copyToClipboard } from './lib/clipboard.mjs';
-import { extractNumbers } from './lib/numbers.mjs';
 import {
-  findCacheByPdf,
-  findCachedJobByAlias,
-  listCachedJobs,
-} from './lib/output-paths.mjs';
+  readOptionalJson,
+  readTextInput,
+  resolveGithubCandidates,
+  resolveJob,
+} from './lib/job-context.mjs';
+import { verifyAnswer } from './lib/answer-verify.mjs';
 import { LlmError, runAgent } from './lib/llm.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -70,7 +53,12 @@ const hint = readHints(options.hints);
 
 let resolved;
 try {
-  resolved = await resolveJob(options);
+  resolved = await resolveJob(options, {
+    rootDir,
+    cacheRoot,
+    resumeOutputDir,
+    log: (message) => console.log(`answer: ${message}`),
+  });
 } catch (error) {
   fail(error.message);
 }
@@ -100,12 +88,24 @@ const candidatesPath = join(cacheDir, 'github-candidates.json');
 if (!existsSync(savedJobPath)) {
   writeFileSync(savedJobPath, formatJobMarkdown(job));
 }
-const resume = readOptionalJson(resumePath);
-const trace = readOptionalJson(tracePath);
-let candidates = readOptionalJson(candidatesPath);
+let resume;
+let trace;
+let candidates;
+try {
+  resume = readOptionalJson(resumePath);
+  trace = readOptionalJson(tracePath);
+  candidates = readOptionalJson(candidatesPath);
+} catch (error) {
+  fail(error.message);
+}
 
 if (!candidates) {
-  candidates = await resolveGithubCandidates(options, career, job);
+  candidates = await resolveGithubCandidates(options, career, job, {
+    rootDir,
+    scriptsDir: __dirname,
+    log: (message) => console.log(`answer: ${message}`),
+    warn: (message) => console.warn(`answer: ${message}`),
+  });
   if (candidates.length > 0) {
     writeFileSync(
       candidatesPath,
@@ -268,279 +268,6 @@ if (verification.gaps.length > 0) {
   for (const gap of verification.gaps) console.log(`  - ${gap}`);
 }
 
-async function resolveJob(opts) {
-  const requestedSlug = opts.slug
-    ? slugify(opts.slug).replace(/^resume-/, '')
-    : '';
-
-  if (opts.input) {
-    const inputPath = resolve(process.cwd(), opts.input);
-    const inputIsFile =
-      existsSync(inputPath) && statSync(inputPath).isFile();
-    const inputIsDirectory =
-      existsSync(inputPath) && statSync(inputPath).isDirectory();
-    const inputIsUrl = /^https?:\/\//i.test(opts.input);
-    const inputIsJson = /\.json$/i.test(opts.input);
-    const inputIsPdf = /\.pdf$/i.test(opts.input);
-
-    if (inputIsDirectory) {
-      const jobFile = join(inputPath, 'job.md');
-      if (existsSync(jobFile)) {
-        return {
-          job: await readJobInput({ input: jobFile }),
-          slug:
-            requestedSlug ||
-            basename(inputPath).replace(/^resume-/, ''),
-        };
-      }
-    }
-
-    if (inputIsFile && !inputIsJson && !inputIsPdf) {
-      return {
-        job: await readJobInput(opts),
-        slug: requestedSlug,
-      };
-    }
-
-    if (inputIsUrl) {
-      return {
-        job: await readJobInput(opts),
-        slug: requestedSlug,
-      };
-    }
-
-    if (inputIsPdf) {
-      const cached = findCacheByPdf({
-        rootDir,
-        cacheRoot,
-        resumeOutputDir,
-        pdfPath: inputPath,
-      });
-      if (cached) {
-        return {
-          job: applyOverrides(
-            await readJobInput({ input: cached.jobPath }),
-            opts,
-          ),
-          slug: requestedSlug || cached.slug,
-        };
-      }
-    }
-
-    if (opts.url || opts.description) {
-      return {
-        job: await readJobInput({ ...opts, input: undefined }),
-        slug: requestedSlug,
-      };
-    }
-
-    let candidateSource = opts.input;
-    if (inputIsJson || inputIsPdf) {
-      candidateSource = basename(opts.input).replace(/\.(json|pdf)$/i, '');
-      if (candidateSource === 'resume') {
-        candidateSource = basename(dirname(opts.input));
-      }
-    }
-    const candidateSlug = slugify(candidateSource).replace(/^resume-/, '');
-    const savedPath = join(
-      cacheRoot,
-      `resume-${candidateSlug}`,
-      'job.md',
-    );
-    if (existsSync(savedPath)) {
-      return {
-        job: applyOverrides(
-          await readJobInput({ input: savedPath }),
-          opts,
-        ),
-        slug: requestedSlug || candidateSlug,
-      };
-    }
-
-    const alias = findCachedJobByAlias({
-      rootDir,
-      cacheRoot,
-      resumeOutputDir,
-      alias: candidateSlug,
-    });
-    if (alias) {
-      return {
-        job: applyOverrides(
-          await readJobInput({ input: alias.jobPath }),
-          opts,
-        ),
-        slug: requestedSlug || alias.slug,
-      };
-    }
-
-    if (opts.title) {
-      return {
-        job: await readJobInput({ ...opts, input: undefined }),
-        slug: requestedSlug,
-      };
-    }
-
-    throw new Error(
-      `Job input not found: ${opts.input}. Pass a URL, a file, or a generated resume slug.`,
-    );
-  }
-
-  if (requestedSlug) {
-    if (opts.url || opts.description) {
-      return {
-        job: await readJobInput({ ...opts, input: undefined }),
-        slug: requestedSlug,
-      };
-    }
-
-    const savedPath = join(
-      cacheRoot,
-      `resume-${requestedSlug}`,
-      'job.md',
-    );
-    if (existsSync(savedPath)) {
-      return {
-        job: applyOverrides(
-          await readJobInput({ input: savedPath }),
-          opts,
-        ),
-        slug: requestedSlug,
-      };
-    }
-
-    const alias = findCachedJobByAlias({
-      rootDir,
-      cacheRoot,
-      resumeOutputDir,
-      alias: requestedSlug,
-    });
-    if (alias) {
-      return {
-        job: applyOverrides(
-          await readJobInput({ input: alias.jobPath }),
-          opts,
-        ),
-        slug: alias.slug,
-      };
-    }
-
-    if (opts.title) {
-      return {
-        job: await readJobInput({ ...opts, input: undefined }),
-        slug: requestedSlug,
-      };
-    }
-    throw new Error(
-      `No saved job found for slug "${requestedSlug}". Generate a resume first or pass a job URL/file.`,
-    );
-  }
-
-  if (opts.url || opts.description || opts.title) {
-    return {
-      job: await readJobInput(opts),
-      slug: '',
-    };
-  }
-
-  const latest = findLatestTailorRun();
-  if (latest) {
-    console.log(
-      `answer: no job specified; using last tailor run: ${latest.slug}`,
-    );
-    return {
-      job: await readJobInput({ input: latest.jobPath }),
-      slug: latest.slug,
-    };
-  }
-
-  throw new Error(
-    'Provide a job URL, a job file, or --slug for an existing generated resume. No previous tailor run is available to reuse.',
-  );
-}
-
-function findLatestTailorRun() {
-  const runs = listCachedJobs({
-    rootDir,
-    cacheRoot,
-    resumeOutputDir,
-  })
-    .map((job) => ({
-      ...job,
-      mtime: existsSync(job.pdfPath)
-        ? statSync(job.pdfPath).mtimeMs
-        : statSync(job.jobPath).mtimeMs,
-    }))
-    .sort((a, b) => b.mtime - a.mtime);
-
-  return runs[0] ?? null;
-}
-
-function applyOverrides(job, opts) {
-  return {
-    ...job,
-    title: opts.title?.trim() || job.title,
-    company: opts.company?.trim() || job.company,
-    url: opts.url?.trim() || job.url,
-  };
-}
-
-async function resolveGithubCandidates(opts, careerData, jobData) {
-  const githubPath = resolve(rootDir, 'data/github.json');
-  let githubSynced = false;
-
-  if (
-    !opts.noSync &&
-    (opts.refresh ||
-      shouldSyncGithub(githubPath, { noSync: opts.noSync }))
-  ) {
-    console.log(
-      opts.refresh
-        ? 'answer: refreshing GitHub/org and local project sources'
-        : 'answer: GitHub data is missing or older than 24 hours; syncing',
-    );
-    const sync = spawnSync(
-      process.execPath,
-      [resolve(__dirname, 'sync-github.mjs')],
-      { cwd: rootDir, stdio: 'inherit' },
-    );
-    githubSynced = sync.status === 0;
-    if (!githubSynced) {
-      console.warn(
-        'answer: GitHub/org sync failed; continuing with local project scan.',
-      );
-    }
-  }
-
-  const localPath = resolve(rootDir, 'data/local-projects.json');
-  if (
-    !opts.noSync &&
-    !githubSynced &&
-    (opts.refresh || shouldSyncLocal(localPath, { noSync: opts.noSync }))
-  ) {
-    console.log('answer: rescanning local projects');
-    const sync = spawnSync(
-      process.execPath,
-      [resolve(__dirname, 'sync-local-projects.mjs')],
-      { cwd: rootDir, stdio: 'inherit' },
-    );
-    if (sync.status !== 0) {
-      console.warn(
-        'answer: local project sync failed; continuing without local candidates.',
-      );
-    }
-  }
-
-  const github = loadGithub(githubPath);
-  const local = loadLocal(localPath);
-  if (!github && !local) {
-    console.warn(
-      'answer: no project metadata found; run `aube run sync-github` to include GitHub and local projects.',
-    );
-    return [];
-  }
-  return selectProjects(github, local, careerData, jobData);
-}
-
 function buildPrompt({
   career,
   job,
@@ -562,6 +289,18 @@ function buildPrompt({
     '<job_description>',
     job.body || job.title,
     '</job_description>',
+  ];
+
+  if (job.details && Object.keys(job.details).length > 0) {
+    sections.push(
+      '',
+      '<job_details>',
+      stringifyYaml(job.details).trim(),
+      '</job_details>',
+    );
+  }
+
+  sections.push(
     '',
     '<career>',
     stringifyYaml(career).trim(),
@@ -572,7 +311,7 @@ function buildPrompt({
     '</project_candidates>',
     '',
     'Project entries may come from personal GitHub, organizations, or local ~/projects repositories. Cite the entry\'s `evidence` value.',
-  ];
+  );
 
   if (resume) {
     sections.push(
@@ -609,190 +348,9 @@ function buildPrompt({
   return sections.join('\n');
 }
 
-function verifyAnswer({ output, career, candidates, hint }) {
-  const errors = [];
-  const warnings = [];
-  const known = buildEvidenceMap(career, candidates, hint);
-  const allowedYears = buildAllowedYears(career);
 
-  const claims = Array.isArray(output.claims) ? output.claims : [];
-  const evidence = Array.isArray(output.evidence) ? output.evidence : [];
-  const gaps = Array.isArray(output.gaps) ? output.gaps : [];
 
-  if (!Array.isArray(output.claims)) errors.push('claims is missing');
-  if (!Array.isArray(output.evidence)) errors.push('evidence is missing');
-  if (!Array.isArray(output.gaps)) warnings.push('gaps is missing');
 
-  const allowedTypes = [
-    'application',
-    'behavioral',
-    'motivation',
-    'interview-prep',
-    'other',
-  ];
-  if (!allowedTypes.includes(output.question_type)) {
-    warnings.push(
-      `unexpected question_type "${output.question_type}"`,
-    );
-  }
-
-  claims.forEach((entry, index) => {
-    if (!entry || typeof entry.claim !== 'string' || !entry.claim.trim()) {
-      errors.push(`claims[${index}] is missing claim text`);
-      return;
-    }
-    const ids = Array.isArray(entry.evidence) ? entry.evidence : [];
-    if (ids.length === 0) {
-      errors.push(`claims[${index}] has no evidence`);
-      return;
-    }
-    const texts = [];
-    for (const id of ids) {
-      const text = known.get(id);
-      if (!text) {
-        errors.push(`claims[${index}] cites unknown evidence "${id}"`);
-      } else {
-        texts.push(text);
-      }
-    }
-    if (texts.length > 0) {
-      checkNumbers(
-        entry.claim,
-        texts.join('\n'),
-        `claims[${index}]`,
-        errors,
-        allowedYears,
-      );
-    }
-  });
-
-  evidence.forEach((id, index) => {
-    if (!known.has(id)) {
-      errors.push(`evidence[${index}] cites unknown evidence "${id}"`);
-    }
-  });
-
-  const evidenceSet = new Set(evidence);
-  for (const [index, entry] of claims.entries()) {
-    for (const id of entry.evidence ?? []) {
-      if (!evidenceSet.has(id)) {
-        warnings.push(
-          `claims[${index}] evidence "${id}" is not in the top-level evidence list`,
-        );
-      }
-    }
-  }
-
-  if (
-    hint &&
-    !claims.some((entry) => (entry.evidence ?? []).includes('hint'))
-  ) {
-    warnings.push(
-      'a hint was provided but no claims cite it; review whether the hint was used',
-    );
-  }
-
-  if (claims.length === 0 && output.question_type !== 'interview-prep') {
-    warnings.push('no factual claims were provided; review the answer manually');
-  }
-
-  return {
-    errors,
-    warnings,
-    claimCount: claims.length,
-    evidenceCount: evidence.length,
-    gaps,
-  };
-}
-
-function buildEvidenceMap(career, candidates, hint) {
-  const map = new Map();
-  if (hint) map.set('hint', hint);
-  for (const role of career.roles ?? []) {
-    map.set(
-      `role:${role.id}`,
-      [
-        role.company,
-        role.position,
-        role.startDate,
-        role.endDate,
-        role.summary,
-      ]
-        .filter(Boolean)
-        .join('\n'),
-    );
-    for (const achievement of role.achievements ?? []) {
-      map.set(achievement.id, achievement.text ?? '');
-    }
-  }
-  for (const project of career.projects ?? []) {
-    for (const highlight of project.highlights ?? []) {
-      map.set(highlight.id, highlight.text ?? '');
-    }
-  }
-  for (const entry of career.education ?? []) {
-    const id = entry.id || slugify(entry.institution);
-    const text = [
-      entry.institution,
-      entry.area,
-      entry.studyType,
-      entry.startDate,
-      entry.endDate,
-    ]
-      .filter(Boolean)
-      .join(' ');
-    map.set(`education:${id}`, text);
-    map.set('education', text);
-  }
-  for (const repo of candidates ?? []) {
-    const text = [
-      repo.description,
-      repo.readme,
-      ...(repo.localCommits ?? []),
-    ].join('\n');
-    const evidence =
-      repo.evidence ||
-      (repo.source === 'local'
-        ? `local:${repo.name}`
-        : repo.source === 'org' && repo.fullName
-          ? `github:${repo.fullName}`
-          : `github:${repo.name}`);
-
-    map.set(evidence, text);
-    if (repo.source !== 'local') {
-      map.set(`github:${repo.name}`, text);
-      if (repo.fullName) map.set(`github:${repo.fullName}`, text);
-    }
-  }
-  return map;
-}
-
-function buildAllowedYears(career) {
-  const years = new Set();
-  const add = (date) => {
-    const match = String(date ?? '').match(/^(\d{4})/);
-    if (match) years.add(match[1]);
-  };
-  for (const role of career.roles ?? []) {
-    add(role.startDate);
-    add(role.endDate);
-  }
-  for (const entry of career.education ?? []) {
-    add(entry.startDate);
-    add(entry.endDate);
-  }
-  return years;
-}
-
-function checkNumbers(output, sourceText, path, errors, allowedYears) {
-  const sourceNumbers = new Set(extractNumbers(sourceText));
-  for (const number of extractNumbers(output)) {
-    if (allowedYears?.has(number)) continue;
-    if (!sourceNumbers.has(number)) {
-      errors.push(`${path} contains "${number}", which is not in the cited evidence`);
-    }
-  }
-}
 
 function readHints(values) {
   if (!Array.isArray(values)) return '';
@@ -802,23 +360,7 @@ function readHints(values) {
     .join('\n\n');
 }
 
-function readTextInput(value) {
-  if (!value) return '';
-  const path = resolve(process.cwd(), value);
-  if (existsSync(path) && statSync(path).isFile()) {
-    return readFileSync(path, 'utf8').trim();
-  }
-  return String(value).trim();
-}
 
-function readOptionalJson(path) {
-  if (!existsSync(path)) return null;
-  try {
-    return JSON.parse(readFileSync(path, 'utf8'));
-  } catch (error) {
-    fail(`Invalid JSON in ${path}: ${error.message}`);
-  }
-}
 
 function truncate(value, length) {
   const text = String(value).replace(/\s+/g, ' ').trim();

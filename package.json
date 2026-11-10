@@ -14,6 +14,8 @@
 		"watch": "node scripts/watch.mjs",
 		"tailor": "node scripts/tailor.mjs",
 		"answer": "node scripts/answer.mjs",
+		"proposal": "node scripts/proposal.mjs",
+		"publish": "node scripts/publish.mjs",
 		"score-projects": "node scripts/score-projects.mjs",
 		"sync-github": "node scripts/sync-github.mjs",
 		"sync-local": "node scripts/sync-local-projects.mjs",
