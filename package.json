@@ -1,5 +1,5 @@
 {
-	"name": "resume-json",
+	"name": "json-resume",
 	"version": "1.0.0",
 	"private": true,
 	"type": "module",
@@ -12,16 +12,7 @@
 		"pdf-all": "node scripts/build.mjs pdf-all",
 		"validate": "node scripts/validate.mjs",
 		"watch": "node scripts/watch.mjs",
-		"tailor": "node scripts/tailor.mjs",
-		"answer": "node scripts/answer.mjs",
-		"proposal": "node scripts/proposal.mjs",
-		"publish": "node scripts/publish.mjs",
-		"score-projects": "node scripts/score-projects.mjs",
-		"sync-github": "node scripts/sync-github.mjs",
-		"sync-local": "node scripts/sync-local-projects.mjs",
-		"verify-resume": "node scripts/verify-resume.mjs",
-		"clean-cache": "node scripts/clean-cache.mjs",
-		"pull-private": "node scripts/pull-private.mjs"
+		"publish": "node scripts/publish.mjs"
 	},
 	"devDependencies": {
 		"jsonresume-theme-straightforward": "^0.5.0",
@@ -34,13 +25,6 @@
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/rwendell/json-resume"
-	},
-	"dependencies": {
-		"@jsonresume/schema": "^1.7.0",
-		"cheerio": "^1.2.0",
-		"html-to-text": "^10.0.1",
-		"pdf-lib": "^1.17.1",
-		"yaml": "^2.9.1"
 	},
 	"aube": {
 		"allowBuilds": {

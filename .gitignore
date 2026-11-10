@@ -1,14 +1,6 @@
 node_modules/
 dist/
-applications/
-generated/
-.cache/
 .env
 .env.*
-data/github.json
-data/local-projects.json
-data/career.private.yml
-data/upwork.yml
-*.lock.json
 .DS_Store
 Thumbs.db
