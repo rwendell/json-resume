@@ -62,12 +62,13 @@ aube run render -- software-engineer jsonresume-theme-even
 
 ## Publish a dossier-generated resume
 
-`dossier` writes files such as `resume-<slug>.json` in the current directory.
-Publish one into this repo:
+`dossier tailor` keeps the JSON Resume in its precursor cache
+(`~/.cache/dossier/precursors/`) and writes only the PDF to the current
+directory. Publish the JSON into this repo:
 
 ```bash
-aube run publish -- /path/to/resume-<slug>.json
-aube run publish -- /path/to/resume-<slug>.pdf --name my-resume
+aube run publish -- ~/.cache/dossier/precursors/resume-<slug>.json
+aube run publish -- ~/.cache/dossier/precursors/resume-<slug>.json --name my-resume
 aube run publish -- resume.json --dry-run
 aube run publish -- resume.json --no-build
 ```
