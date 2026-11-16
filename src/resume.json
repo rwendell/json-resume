@@ -5,7 +5,8 @@
 		"label": "Software Engineer",
 		"email": "ryanjwendell@gmail.com",
 		"phone": "(224) 723-4213",
-		"summary": "Software engineer with experience delivering full-stack features, APIs, and data pipelines for enterprise financial platforms and security tooling.",
+		"url": "https://rwendell.github.io",
+		"summary": "Software engineer with 5+ years shipping full-stack features, API integrations, and Kafka data pipelines for enterprise platforms. Translates business needs into technical solutions and works across technical and non-technical teams.",
 		"location": {
 			"city": "Chicago",
 			"region": "Illinois",
@@ -31,12 +32,12 @@
 			"url": "https://www.linkedin.com/company/3831/",
 			"startDate": "2022-08",
 			"endDate": "2026-02",
-			"summary": "Full-stack engineer on enterprise financial platforms, leading feature delivery and cross-functional collaboration across international teams.",
+			"summary": "Full-stack engineer on enterprise financial platforms, working across international teams.",
 			"highlights": [
-				"Led end-to-end delivery of production features and integrations, owning API design, testing, deployment, monitoring, and production support.",
-				"Built full-stack features with TypeScript, React, and Redux on the frontend and Spring Boot with Java 21 on the backend, integrating internal enterprise systems.",
-				"Optimized Oracle SQL schemas, JPA/Hibernate mappings, and Kafka pipelines processing 2.5M daily transactions for high-throughput financial workloads.",
-				"Consolidated historical storage into Snowflake on Azure, reducing storage costs while maintaining high availability for cross-functional teams."
+				"Developed full-stack features with TypeScript, React, and Redux on the frontend and Spring Boot with Java 21 on the backend, integrating with internal systems.",
+				"Optimized Oracle SQL schemas, stored procedures, JPA/Hibernate mappings, and high-throughput Apache Kafka pipelines processing 2.5M daily transactions.",
+				"Consolidated disparate historical storage into Snowflake on Azure, managing storage costs while ensuring high availability for cross-functional teams.",
+				"Staffed on-call rotations for business-critical financial platforms, triaging team-wide incidents and outages and escalating to the appropriate owners."
 			]
 		},
 		{
@@ -45,10 +46,11 @@
 			"url": "https://www.linkedin.com/company/36107929/",
 			"startDate": "2021-12",
 			"endDate": "2022-06",
-			"summary": "Built security tooling for automated vulnerability detection and remediation across source code, developer environments, and CI/CD pipelines.",
+			"summary": "Frontend-focused engineer on security tooling for automated vulnerability detection and remediation across source code, developer environments, and CI/CD pipelines.",
 			"highlights": [
-				"Built a React/Redux security dashboard for automated vulnerability detection and remediation across source code, developer environments, and CI/CD pipelines.",
-				"Resolved critical logic flaws in risk-scoring algorithms, improving data accuracy and reducing false-positive alerts for enterprise clients."
+				"Created a React/Redux security dashboard for automated vulnerability detection and remediation across source code, developer environments, and CI/CD pipelines.",
+				"Resolved critical logic flaws in security risk-scoring algorithms, improving data accuracy and reducing false-positive alerts for enterprise clients.",
+				"Implemented Jest and Cypress suites that improved feature reliability and UI performance, and wrote real-time browser tests ensuring end-to-end application stability."
 			]
 		},
 		{
@@ -57,29 +59,29 @@
 			"url": "https://www.linkedin.com/company/44730/",
 			"startDate": "2021-03",
 			"endDate": "2021-12",
-			"summary": "Developed full-stack automation solutions to streamline enterprise business processes.",
+			"summary": "Full-stack automation engineer building business process solutions with C#/.NET and SQL.",
 			"highlights": [
-				"Orchestrated full-stack automation solutions with C#/.NET and SQL, streamlining enterprise workflows across OCR, HR, and fundraising departments."
+				"Orchestrated full-stack automation in C#/.NET and SQL across OCR, HR, and fundraising departments to improve workflows."
 			]
 		}
 	],
 	"projects": [
 		{
 			"name": "dossier",
-			"description": "Local-first CLI that runs OpenCode agent prompts to generate grounded resumes, proposals, and application answers from a career fact bank.",
+			"description": "Local-first CLI that runs OpenCode agent prompts to produce grounded resumes, proposals, and application answers from a career fact bank.",
 			"url": "https://github.com/rwendell/dossier",
 			"highlights": [
-				"Built an OpenCode-agent pipeline that generates tailored resumes, proposals, and application answers from a local career fact bank",
-				"Recorded an evidence trace for every generated claim and verified outputs before rendering",
-				"Published a global CLI package with XDG data paths, mode-aware caching, and Puppeteer-based PDF rendering"
+				"Engineered an OpenCode-agent pipeline that tailors resumes, proposals, and application answers from a local fact bank",
+				"Recorded an evidence trace for every generated claim and verified outputs before rendering"
 			],
 			"keywords": [
 				"TypeScript",
+				"Node",
 				"AI Agents",
 				"LLM Orchestration",
+				"Prompt Engineering",
 				"CLI",
-				"Puppeteer",
-				"Evidence Tracing"
+				"Puppeteer"
 			]
 		},
 		{
@@ -87,16 +89,33 @@
 			"description": "Full-stack household meal-planning application that turns shared weekly decisions into an actionable grocery workflow.",
 			"url": "https://github.com/rwendell/meal-planner",
 			"highlights": [
-				"Delivered a multi-user SvelteKit, TypeScript, and Convex app with authentication, household onboarding, shared planning, real-time data, and a Google OAuth2 flow handling redirects and session state",
-				"Defined a focused product experience spanning meal management, weekly planning, household collaboration, leftover tracking, and synchronized shopping lists"
+				"Delivered a multi-user SvelteKit and Convex app with household onboarding and real-time shared planning, plus a multi-step Google OAuth2 flow handling redirects and session state"
 			],
 			"keywords": [
-				"SvelteKit",
 				"TypeScript",
+				"SvelteKit",
 				"Convex",
-				"OAuth2",
-				"Real-time",
-				"Full-stack"
+				"Tailwind CSS",
+				"OAuth",
+				"Full-Stack Web"
+			]
+		},
+		{
+			"name": "SlippiOS",
+			"description": "Bootable USB image that runs a Melee console with a Godot shell, a Go backend, and Secure Boot support.",
+			"url": "https://github.com/SlippiOS/SlippiOS",
+			"highlights": [
+				"Published 0.5.0 of a bootable USB image with A/B system updates, Wi-Fi setup, and signed Secure Boot images",
+				"Integrated a Go backend with Cobra CLI commands and GraphQL routes, covering browser sign-in, network ISO upload, and native GameCube-adapter input"
+			],
+			"keywords": [
+				"Go",
+				"Nix",
+				"Shell",
+				"USB",
+				"Secure Boot",
+				"Cobra",
+				"GraphQL"
 			]
 		}
 	],
@@ -108,27 +127,33 @@
 				"Java",
 				"Go",
 				"Python",
-				"C#/.NET"
+				"C#/.NET",
+				"React",
+				"Redux"
 			]
 		},
 		{
-			"name": "Data & Cloud",
+			"name": "Data & Integration",
 			"keywords": [
 				"Apache Kafka",
 				"Oracle SQL",
 				"Snowflake",
 				"Azure",
-				"REST APIs"
+				"REST APIs",
+				"OAuth",
+				"JPA/Hibernate"
 			]
 		},
 		{
-			"name": "AI & Systems",
+			"name": "AI, Tools & Systems",
 			"keywords": [
 				"AI Agents",
-				"Agentic Workflows",
 				"LLM Orchestration",
 				"Prompt Engineering",
-				"CLI Tooling"
+				"Cypress",
+				"Jest",
+				"CI/CD",
+				"Nix"
 			]
 		}
 	],
