@@ -10,7 +10,7 @@ This repository is intentionally site-only:
 - `scripts/validate.mjs` — validate published resumes
 - `scripts/watch.mjs` — development watch mode
 - `scripts/publish.mjs` — publish a generated resume JSON into `src/`
-- `.github/workflows/publish.yml` — build, gist mirror, and portfolio resume sync
+- `.github/workflows/publish.yml` — build and portfolio resume sync
 
 Resume generation, job tailoring, interview answers, Upwork proposals, and
 career data live in the separate [`dossier`](https://github.com/rwendell/dossier)
@@ -87,10 +87,10 @@ git commit -m "Publish <name> resume"
 git push
 ```
 
-Pushing to `main` triggers the publish workflow, which validates, builds, mirrors
-the JSON files to the configured gist, and dispatches a resume sync to
-`rwendell/rwendell.github.io`. That workflow regenerates the hosted PDF and
-previews from `src/RyanWendell-Resume.json`.
+Pushing to `main` triggers the publish workflow, which validates, builds, and
+dispatches a resume sync to `rwendell/rwendell.github.io`. That workflow clones
+this repository and regenerates the hosted PDF and previews from
+`src/resume.json`.
 
 ## Manual resumes
 
