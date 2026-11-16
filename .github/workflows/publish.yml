@@ -94,21 +94,22 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-  deploy-to-github-io-repo:
+  notify-portfolio:
     needs: build
-    if: vars.GH_IO_REPO != ''
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: dist
-          path: dist
+      - name: Dispatch portfolio resume sync
+        env:
+          TOKEN: ${{ secrets.GIST_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "::warning::GIST_TOKEN is not configured; skipping portfolio sync."
+            exit 0
+          fi
 
-      - name: Deploy to github.io repo
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          personal_token: ${{ secrets.GIST_TOKEN }}
-          external_repository: ${{ vars.GH_IO_REPO }}
-          publish_branch: main
-          publish_dir: ./dist
-          commit_message: "Update resume from source repository"
+          curl --fail --silent --show-error -X POST \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/rwendell/rwendell.github.io/dispatches \
+            -d '{"event_type":"resume-updated"}'
