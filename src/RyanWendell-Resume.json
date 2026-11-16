@@ -1,0 +1,155 @@
+{
+	"$schema": "https://raw.githubusercontent.com/jsonresume/resume-schema/master/schema.json",
+	"basics": {
+		"name": "Ryan Wendell",
+		"label": "Software Engineer",
+		"email": "ryanjwendell@gmail.com",
+		"phone": "(224) 723-4213",
+		"url": "https://rwendell.github.io",
+		"summary": "Software engineer with 5 years building full-stack features, API integrations, and data pipelines for enterprise financial and security platforms. Recent work spans AI agent tooling in TypeScript and Go systems on Linux, backed by Nix-based image builds.",
+		"location": {
+			"city": "Chicago",
+			"region": "Illinois",
+			"countryCode": "US"
+		},
+		"profiles": [
+			{
+				"network": "LinkedIn",
+				"username": "rjwendell",
+				"url": "https://www.linkedin.com/in/rjwendell/"
+			},
+			{
+				"network": "GitHub",
+				"username": "rwendell",
+				"url": "https://github.com/rwendell"
+			}
+		]
+	},
+	"work": [
+		{
+			"name": "Northern Trust",
+			"position": "Senior Associate - Software Engineer",
+			"url": "https://www.linkedin.com/company/3831/",
+			"startDate": "2022-08",
+			"endDate": "2026-02",
+			"summary": "Full-stack engineer on enterprise financial platforms, owning feature delivery and cross-functional collaboration across international teams.",
+			"highlights": [
+				"Led end-to-end delivery of production features and integrations, from API design through deployment and monitoring, and staffed on-call rotations triaging team-wide incidents.",
+				"Optimized Oracle SQL schemas and stored procedures, JPA/Hibernate mappings, and high-throughput Apache Kafka pipelines processing 2.5M daily transactions.",
+				"Developed full-stack features in TypeScript, React, and Redux on the frontend and Spring Boot with Java 21 on the backend, integrating with internal systems.",
+				"Consolidated disparate historical storage into Snowflake on Azure, reducing storage costs while keeping data highly available for cross-functional teams."
+			]
+		},
+		{
+			"name": "BluBracket (acquired by HashiCorp)",
+			"position": "Software Engineer Consultant",
+			"url": "https://www.linkedin.com/company/36107929/",
+			"startDate": "2021-12",
+			"endDate": "2022-06",
+			"summary": "Security tooling for automated vulnerability detection and remediation across source code, developer environments, and CI/CD pipelines.",
+			"highlights": [
+				"Built a React/Redux security dashboard for automated vulnerability detection and remediation across source code, developer environments, and CI/CD pipelines.",
+				"Resolved critical logic flaws in security risk-scoring algorithms, improving data accuracy and reducing false-positive alerts for enterprise clients.",
+				"Implemented Jest and Cypress suites, including real-time browser tests, tightening feature reliability and UI performance across staging and production."
+			]
+		},
+		{
+			"name": "Impact Networking, LLC",
+			"position": "BPA Developer",
+			"url": "https://www.linkedin.com/company/44730/",
+			"startDate": "2021-03",
+			"endDate": "2021-12",
+			"summary": "Automation consulting for business processes across OCR, HR, and fundraising departments.",
+			"highlights": [
+				"Orchestrated full-stack automation in C#/.NET and SQL for OCR, HR, and fundraising workflows."
+			]
+		}
+	],
+	"projects": [
+		{
+			"name": "dossier",
+			"description": "Local-first CLI that runs OpenCode agent prompts to generate grounded resumes, proposals, and application answers from a career fact bank.",
+			"url": "https://github.com/rwendell/dossier",
+			"highlights": [
+				"Designed an OpenCode agent pipeline that produces tailored resumes, proposals, and application answers from a local career fact bank",
+				"Traced every generated claim to source evidence and validated output before rendering"
+			],
+			"keywords": [
+				"TypeScript",
+				"Node.js",
+				"AI Agents",
+				"LLM",
+				"Prompt Engineering",
+				"CLI",
+				"Puppeteer"
+			]
+		},
+		{
+			"name": "SlippiOS",
+			"description": "Open-source Melee console image that boots a fullscreen shell and keeps games, settings, and replays on a USB stick.",
+			"url": "https://github.com/SlippiOS/SlippiOS",
+			"highlights": [
+				"Nix-packaged a bootable Linux image with A/B system updates, browser sign-in, Wi-Fi setup, and signed Secure Boot images",
+				"Wrote the Go backend and Cobra CLI that handles network ISO upload and device setup"
+			],
+			"keywords": [
+				"Go",
+				"Nix",
+				"Linux",
+				"Secure Boot",
+				"Cobra",
+				"Shell"
+			]
+		}
+	],
+	"skills": [
+		{
+			"name": "Languages & Frameworks",
+			"keywords": [
+				"TypeScript",
+				"Java",
+				"Go",
+				"Kotlin",
+				"Python",
+				"React",
+				"Spring Boot",
+				"C#/.NET"
+			]
+		},
+		{
+			"name": "Data & Integration",
+			"keywords": [
+				"Apache Kafka",
+				"Oracle SQL",
+				"Snowflake",
+				"Azure",
+				"REST APIs",
+				"OAuth",
+				"JSON",
+				"Webhooks"
+			]
+		},
+		{
+			"name": "Tools & Practices",
+			"keywords": [
+				"Git",
+				"Jest",
+				"Cypress",
+				"CI/CD",
+				"API Design",
+				"Test-Driven Development",
+				"Accessibility (a11y)",
+				"Agile/Scrum"
+			]
+		}
+	],
+	"education": [
+		{
+			"institution": "Iowa State University",
+			"area": "Computer Science",
+			"studyType": "BS",
+			"startDate": "2016-08",
+			"endDate": "2020-12"
+		}
+	]
+}
