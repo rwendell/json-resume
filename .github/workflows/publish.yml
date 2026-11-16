@@ -63,10 +63,10 @@ jobs:
     steps:
       - name: Dispatch portfolio resume sync
         env:
-          TOKEN: ${{ secrets.GIST_TOKEN }}
+          TOKEN: ${{ secrets.PORTFOLIO_DISPATCH_TOKEN }}
         run: |
           if [ -z "$TOKEN" ]; then
-            echo "::warning::GIST_TOKEN is not configured; skipping portfolio sync."
+            echo "::warning::PORTFOLIO_DISPATCH_TOKEN is not configured; skipping portfolio sync."
             exit 0
           fi
 
